@@ -1,0 +1,8 @@
+README.md
+operational-data/README.md
+property-budget/README.md
+property-events/README.md
+schema/README.md
+RELEASE.md
+release-files.txt
+scripts/package-release.ps1

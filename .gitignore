@@ -1,0 +1,15 @@
+/dist/
+*.zip
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.bak
+*.log
+.vs/
+.vscode/
+Thumbs.db
+.DS_Store
