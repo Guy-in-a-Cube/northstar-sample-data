@@ -65,7 +65,7 @@ jobs:
           if ($env:REQUESTED_RUN_ID) { $parameters.RunId = $env:REQUESTED_RUN_ID }
           $json = (& ./scripts/prepare-operational-release.ps1 @parameters) -join "`n"
           $plan = $json | ConvertFrom-Json
-          if ($plan.files.Count -ne 11) { throw 'Unexpected release asset count.' }
+          if ($plan.files.Count -ne 10) { throw 'Unexpected release asset count.' }
           & ./scripts/test-operational-release.ps1 -SourceDirectory (Split-Path -Parent $plan.files[0]) | ForEach-Object { Write-Host $_ }
           $planPath = Join-Path $output 'release-plan.json'
           [IO.File]::WriteAllText($planPath, $json, [Text.UTF8Encoding]::new($false))
@@ -100,4 +100,4 @@ jobs:
             $digest = 'sha256:' + (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
             if ($assets.Count -ne 1 -or $assets[0].size -ne $file.Length -or $assets[0].digest -cne $digest) { throw "Uploaded asset verification failed: $($file.Name)" }
           }
-          [IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, "Draft created and all 11 uploaded asset sizes and SHA-256 digests verified: $($matches[0].html_url)`nNo release was published.`n", [Text.UTF8Encoding]::new($false))
+          [IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, "Draft created and all 10 uploaded asset sizes and SHA-256 digests verified: $($matches[0].html_url)`nNo release was published.`n", [Text.UTF8Encoding]::new($false))

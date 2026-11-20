@@ -12,6 +12,8 @@ param(
     [Parameter(ParameterSetName = 'Azure')]
     [ValidatePattern('^(?:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$')]
     [string]$RunId,
+    [ValidatePattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
+    [string]$Repository = $env:GITHUB_REPOSITORY,
     [Parameter(Mandatory)]
     [string]$OutputDirectory
 )
@@ -187,6 +189,7 @@ $inventory = foreach ($table in $tables.Keys) {
     [ordered]@{
         table = $entry.table
         name = $entry.name
+        archive_path = "operations-data/$($entry.name)"
         rows = $rows
         bytes = $entry.bytes
         sha256 = (Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -204,13 +207,68 @@ $manifest = [ordered]@{
 $tag = "operational-$($completed.ToString('yyyyMMddTHHmmssfffZ'))-$($marker.run_id)"
 [IO.Directory]::CreateDirectory($outputPath) | Out-Null
 $encoding = [Text.UTF8Encoding]::new($false)
+
+function New-VerifiedArchive {
+    param([string]$Path, [object[]]$Entries)
+    $stream = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+    try {
+        $archive = [IO.Compression.ZipArchive]::new($stream, [IO.Compression.ZipArchiveMode]::Create, $true)
+        try {
+            foreach ($entry in $Entries) {
+                [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $entry.source, $entry.name) | Out-Null
+            }
+        } finally { $archive.Dispose() }
+        $stream.Position = 0
+        $archive = [IO.Compression.ZipArchive]::new($stream, [IO.Compression.ZipArchiveMode]::Read, $true)
+        try {
+            if ($archive.Entries.Count -ne $Entries.Count) { throw 'Archive entry count mismatch.' }
+            foreach ($entry in $archive.Entries) {
+                $expected = @($Entries | Where-Object { $_.name -ceq $entry.FullName })
+                if ($expected.Count -ne 1) { throw 'Unexpected archive path.' }
+                $entryStream = $entry.Open()
+                $hash = [Security.Cryptography.SHA256]::Create()
+                try { $actual = [BitConverter]::ToString($hash.ComputeHash($entryStream)).Replace('-', '').ToLowerInvariant() }
+                finally { $hash.Dispose(); $entryStream.Dispose() }
+                if ($actual -cne $expected[0].sha256) { throw "Archive content mismatch: $($entry.FullName)" }
+            }
+        } finally { $archive.Dispose() }
+    } finally { $stream.Dispose() }
+}
+
+$dataArchive = Join-Path $outputPath 'operations-data.zip'
+$dataEntries = @($inventory | ForEach-Object {
+    [pscustomobject]@{ source = Join-Path $directoryPath $_.name; name = $_.archive_path; sha256 = $_.sha256 }
+})
+New-VerifiedArchive -Path $dataArchive -Entries $dataEntries
+$manifest['data_archive'] = [ordered]@{
+    name = 'operations-data.zip'
+    bytes = (Get-Item -LiteralPath $dataArchive).Length
+    sha256 = (Get-FileHash -LiteralPath $dataArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+}
 $manifestPath = Join-Path $outputPath 'release-manifest.json'
 [IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 6) + "`n", $encoding)
-$checksums = @($inventory | ForEach-Object { "$($_.sha256)  $($_.name)" })
-$checksums += "$($manifest.completion_marker_sha256)  _SUCCESS.json"
-$checksums += "$((Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant())  release-manifest.json"
+$checksums = @($inventory | ForEach-Object { "$($_.sha256)  $($_.archive_path)" })
+$checksums += "$($manifest.completion_marker_sha256)  validation/_SUCCESS.json"
+$checksums += "$((Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant())  validation/release-manifest.json"
+$checksums += "$($manifest.data_archive.sha256)  operations-data.zip"
 [IO.File]::WriteAllText((Join-Path $outputPath 'SHA256SUMS.txt'), ($checksums -join "`n") + "`n", $encoding)
+$validationArchive = Join-Path $outputPath 'operations-data-validation.zip'
+$validationEntries = @(
+    [pscustomobject]@{ source = $markerPath; name = 'validation/_SUCCESS.json'; sha256 = $manifest.completion_marker_sha256 }
+    [pscustomobject]@{ source = $manifestPath; name = 'validation/release-manifest.json'; sha256 = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant() }
+    [pscustomobject]@{ source = Join-Path $outputPath 'SHA256SUMS.txt'; name = 'validation/SHA256SUMS.txt'; sha256 = (Get-FileHash -LiteralPath (Join-Path $outputPath 'SHA256SUMS.txt') -Algorithm SHA256).Hash.ToLowerInvariant() }
+)
+New-VerifiedArchive -Path $validationArchive -Entries $validationEntries
+$downloads = if ($Repository) { "https://github.com/$Repository/releases/download/$tag" } else { '.' }
 $notes = @"
+[Download CSVs]($downloads/operations-data.zip)
+
+The data ZIP contains only the eight CSVs under operations-data/. Individual CSV downloads are also available.
+
+[Validation bundle]($downloads/operations-data-validation.zip)
+
+The optional validation ZIP contains the completion marker, manifest, and checksums under validation/. Extract it beside operations-data/ to check CSV hashes. Download links become available when this draft is published; draft reviewers can use the asset list.
+
 Manual draft of the Northstar operational data snapshot completed at $($marker.completed_at_utc).
 
 Run: $($marker.run_id)
@@ -219,16 +277,13 @@ Eight full-table CSVs, including audit columns and soft-deleted rows. This is no
 
 Operational data assets are dedicated under CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/ . This does not select a license for repository code or documentation.
 
-File inventory, row counts, byte sizes, UTF-8 decoding, and CSV structure were validated before preparing this draft. SHA256SUMS.txt records downloaded asset hashes; these are not an independent comparison against the SQL source. Keep the marker and manifest with the CSVs.
+File inventory, row counts, byte sizes, UTF-8 decoding, and CSV structure were validated before preparing this draft. SHA256SUMS.txt records downloaded asset hashes; these are not an independent comparison against the SQL source. Data ZIP entry paths and content hashes were verified without changing the CSV bytes.
 "@
 [IO.File]::WriteAllText((Join-Path $outputPath 'release-notes.md'), $notes + "`n", $encoding)
 [ordered]@{
     tag = $tag
     title = "Northstar operational data - $($marker.completed_at_utc)"
     run_id = $marker.run_id
-    files = @($expectedNames | ForEach-Object { Join-Path $directoryPath $_ }) + @(
-        $manifestPath
-        (Join-Path $outputPath 'SHA256SUMS.txt')
-    )
+    files = @($inventory | ForEach-Object { Join-Path $directoryPath $_.name }) + @($dataArchive, $validationArchive)
     notes = Join-Path $outputPath 'release-notes.md'
 } | ConvertTo-Json -Depth 4

@@ -63,7 +63,7 @@ try {
     Reset-Fixture
     $validOutput = Join-Path $root 'valid'
     $plan = (& $prepare -Directory $fixture -OutputDirectory $validOutput) -join "`n" | ConvertFrom-Json
-    if ($plan.files.Count -ne 11) { throw 'Valid fixture did not produce exactly 11 planned assets.' }
+    if ($plan.files.Count -ne 10) { throw 'Valid fixture did not produce exactly 10 planned assets.' }
     $manifest = Get-Content -Raw -LiteralPath (Join-Path $validOutput 'release-manifest.json') | ConvertFrom-Json
     if (@($manifest.files).Count -ne 8 -or @($manifest.files | Where-Object rows -NE 0).Count -ne 0) {
         throw 'Header-only fixture validation failed.'
@@ -73,7 +73,32 @@ try {
             throw 'Generated checksum mismatch.'
         }
     }
-    Write-Output 'PASS: header-only test fixture produces 11 explicit assets and correct CSV hashes.'
+    $archive = [IO.Compression.ZipFile]::OpenRead((Join-Path $validOutput 'operations-data.zip'))
+    try {
+        $expectedPaths = @($baseline.files | ForEach-Object { "operations-data/$($_.name)" })
+        if ($archive.Entries.Count -ne 8 -or @(Compare-Object $expectedPaths @($archive.Entries.FullName) -CaseSensitive).Count -ne 0) {
+            throw 'Data ZIP must contain only eight CSVs in operations-data/.'
+        }
+        foreach ($entry in $archive.Entries) {
+            $entryStream = $entry.Open()
+            $hash = [Security.Cryptography.SHA256]::Create()
+            try { $actual = [BitConverter]::ToString($hash.ComputeHash($entryStream)).Replace('-', '').ToLowerInvariant() }
+            finally { $hash.Dispose(); $entryStream.Dispose() }
+            $expected = @($manifest.files | Where-Object { $_.archive_path -ceq $entry.FullName })[0]
+            if ($actual -cne $expected.sha256) { throw 'CSV content changed inside data ZIP.' }
+        }
+    } finally { $archive.Dispose() }
+    $archive = [IO.Compression.ZipFile]::OpenRead((Join-Path $validOutput 'operations-data-validation.zip'))
+    try {
+        $expectedPaths = @('validation/_SUCCESS.json', 'validation/release-manifest.json', 'validation/SHA256SUMS.txt')
+        if ($archive.Entries.Count -ne 3 -or @(Compare-Object $expectedPaths @($archive.Entries.FullName) -CaseSensitive).Count -ne 0) {
+            throw 'Validation ZIP must contain only the three separate verification files.'
+        }
+    } finally { $archive.Dispose() }
+    if ($manifest.data_archive.sha256 -cne (Get-FileHash -LiteralPath (Join-Path $validOutput 'operations-data.zip')).Hash.ToLowerInvariant()) {
+        throw 'Data ZIP checksum mismatch.'
+    }
+    Write-Output 'PASS: ten assets, data-only operations-data/ ZIP, separate validation bundle, and unchanged CSV hashes.'
 
     Assert-Rejected 'missing completion marker' {
         Remove-Item -LiteralPath (Join-Path $fixture '_SUCCESS.json')
