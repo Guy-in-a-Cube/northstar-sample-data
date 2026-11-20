@@ -1,0 +1,103 @@
+name: Draft Operational Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Optional completed Fabric run ID; blank selects the newest completion marker
+        required: false
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: operational-draft-release
+  cancel-in-progress: false
+
+jobs:
+  draft-release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: sample-data-publish
+    permissions:
+      id-token: write
+      contents: write
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      EXPORT_STORAGE_ACCOUNT: ${{ vars.EXPORT_STORAGE_ACCOUNT }}
+      EXPORT_CONTAINER: ${{ vars.EXPORT_CONTAINER }}
+    steps:
+      - name: Check out release tooling
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Check configuration
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($variable in 'AZURE_CLIENT_ID', 'AZURE_TENANT_ID', 'AZURE_SUBSCRIPTION_ID', 'EXPORT_STORAGE_ACCOUNT', 'EXPORT_CONTAINER') {
+            if (-not [Environment]::GetEnvironmentVariable($variable)) { throw "Missing environment variable: $variable" }
+          }
+
+      - name: Sign into Azure with OIDC
+        uses: Azure/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+
+      - name: Download and validate completed export
+        id: prepare
+        shell: pwsh
+        env:
+          REQUESTED_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $actualClient = az account show --query user.name --output tsv
+          if ($LASTEXITCODE -ne 0 -or $actualClient -cne $env:AZURE_CLIENT_ID) { throw 'Unexpected Azure identity.' }
+          $output = Join-Path $env:RUNNER_TEMP "northstar-release-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          $parameters = @{ StorageAccount = $env:EXPORT_STORAGE_ACCOUNT; Container = $env:EXPORT_CONTAINER; OutputDirectory = $output }
+          if ($env:REQUESTED_RUN_ID) { $parameters.RunId = $env:REQUESTED_RUN_ID }
+          $json = (& ./scripts/prepare-operational-release.ps1 @parameters) -join "`n"
+          $plan = $json | ConvertFrom-Json
+          if ($plan.files.Count -ne 11) { throw 'Unexpected release asset count.' }
+          & ./scripts/test-operational-release.ps1 -SourceDirectory (Split-Path -Parent $plan.files[0]) | ForEach-Object { Write-Host $_ }
+          $planPath = Join-Path $output 'release-plan.json'
+          [IO.File]::WriteAllText($planPath, $json, [Text.UTF8Encoding]::new($false))
+          [IO.File]::AppendAllText($env:GITHUB_OUTPUT, "plan_path=$planPath`n", [Text.UTF8Encoding]::new($false))
+
+      - name: Create and verify draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PLAN: ${{ steps.prepare.outputs.plan_path }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $plan = Get-Content -Raw -LiteralPath $env:RELEASE_PLAN | ConvertFrom-Json
+          $existingTags = @(gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name')
+          if ($LASTEXITCODE -ne 0) { throw 'Could not check existing releases.' }
+          if ($existingTags -ccontains $plan.tag) { throw 'A release for this run already exists; refusing to overwrite it.' }
+          $refs = @(gh api "repos/$env:GITHUB_REPOSITORY/git/matching-refs/tags/$($plan.tag)" | ConvertFrom-Json)
+          if ($LASTEXITCODE -ne 0) { throw 'Could not check existing Git tags.' }
+          if (@($refs | Where-Object { $_.ref -ceq "refs/tags/$($plan.tag)" }).Count -ne 0) { throw 'The release tag already exists.' }
+          foreach ($path in $plan.files) {
+            if ((Get-Item -LiteralPath $path).Length -ge 2GB) { throw 'An asset exceeds the GitHub release size limit.' }
+          }
+          gh release create $plan.tag @($plan.files) --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title $plan.title --notes-file $plan.notes --draft --latest=false
+          if ($LASTEXITCODE -ne 0) { throw 'Draft creation or asset upload failed; any partial draft must remain unpublished.' }
+          $pages = gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --slurp | ConvertFrom-Json -NoEnumerate
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the uploaded draft.' }
+          $matches = @(foreach ($page in $pages) { foreach ($release in $page) { if ($release.tag_name -ceq $plan.tag) { $release } } })
+          if ($matches.Count -ne 1 -or -not $matches[0].draft -or $matches[0].assets.Count -ne $plan.files.Count) { throw 'Draft release inventory verification failed.' }
+          foreach ($path in $plan.files) {
+            $file = Get-Item -LiteralPath $path
+            $assets = @($matches[0].assets | Where-Object { $_.name -ceq $file.Name })
+            $digest = 'sha256:' + (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($assets.Count -ne 1 -or $assets[0].size -ne $file.Length -or $assets[0].digest -cne $digest) { throw "Uploaded asset verification failed: $($file.Name)" }
+          }
+          [IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, "Draft created and all 11 uploaded asset sizes and SHA-256 digests verified: $($matches[0].html_url)`nNo release was published.`n", [Text.UTF8Encoding]::new($false))
