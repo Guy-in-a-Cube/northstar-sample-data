@@ -2,34 +2,42 @@
 
 Northstar is a sample property business used across training courses. This repository brings together operational records, planned property budgets, and property events without tying the data to a single course or platform.
 
-**Current status: learner documentation, an operational table deployment script, and local packaging tools. No source data files were supplied.** There are no downloadable datasets or published releases yet. See the [verified schema, deployment instructions, and missing assets](schema/README.md).
+**Current status: the first operational CSV snapshot is released; Property Budget and Property Events sources are still pending.** This repository is currently private, so download links require repository access until the owner makes it public. See the [verified schema and deployment instructions](schema/README.md).
+
+## Download Operational Data
+
+**[Download Operational Data](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73/operations-data.zip)**
+
+Extract the ZIP to get eight CSVs under `operations-data/`. It contains no verification files. The optional [validation bundle](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73/operations-data-validation.zip) contains the completion marker, manifest, and checksums separately.
+
+This link points to the protected first snapshot, not a changing latest release. Courses should use the exact snapshot referenced in their recordings. No data files need to be moved into a GitHub repository folder.
 
 ## Sources
 
 | Dataset | Business Purpose | Source System | Download Format |
 | --- | --- | --- | --- |
-| [Operational Data](operational-data/README.md) | Core business records, including properties and bookings | SQL Server | CSV exports; not yet supplied |
+| [Operational Data](operational-data/README.md) | Core business records, including properties and bookings | SQL Server | Eight CSVs; data ZIP and individual release assets |
 | [Property Budget](property-budget/README.md) | Planned property budgets | SharePoint list | Seed CSV; not yet supplied |
 | [Property Events](property-events/README.md) | Events associated with properties | Azure Blob Storage | JSON files; not yet supplied |
 
 GitHub distributes the sample files. It is not the SQL Server, SharePoint, or blob storage source system used in course exercises. You provision your own sources from public exports, or use the member database option for operational data.
 
-**Membership is not required to download or use the public sample files.** That access policy does not supply missing files or grant a license: redistribution rights and license terms are still pending confirmation before public release.
+**Membership will not be required to download the public sample files once the repository is public.** Operational data is approved for redistribution under CC0 1.0. Budget/event redistribution and code/documentation license decisions remain pending; public access is not enabled yet.
 
 ## Start Here: Cube Members
 
 1. For the SQL Server path, use the private connection instructions provided through The Cube to connect to `NorthStar_public`. No private server addresses, authentication details, or connection instructions belong in this repository.
-2. Alternatively, use the public operational CSV exports once supplied. Members can choose either path.
+2. Alternatively, use the operational CSV download above. Members can choose either path; repository access is currently required.
 3. Use your own SharePoint list for Property Budget and your own storage for Property Events. See each dataset guide for its setup and readiness checks.
 
 ## Start Here: Public Exports
 
-1. Use the immutable dataset release referenced by your course when one is available. Download its combined ZIP, or the individual files from that same version. No release or download URL exists yet.
+1. Use the immutable dataset release referenced by your course. Download its data ZIP, or the individual CSVs from that same version. The operational link above is the first released snapshot.
 2. Follow [Operational Data](operational-data/README.md) to load CSVs into your own SQL Server database, or import them directly into a Fabric Lakehouse or Warehouse.
 3. Follow [Property Budget](property-budget/README.md) to seed your own SharePoint list from its CSV.
 4. Follow [Property Events](property-events/README.md) to upload the JSON files to your own blob storage, preserving their directory structure.
 
-Data loading is blocked until the source files and verified import conventions are supplied. You can prepare empty operational tables using the [SQL database deployment script and instructions](schema/README.md). Choose your own database, storage, and Fabric item names unless an exercise explicitly requires otherwise.
+Budget/event loading remains blocked until their source files and verified conventions are supplied. You can prepare empty operational tables using the [SQL database deployment script and instructions](schema/README.md). Platform-specific SQL deployment/import tests are still required. Choose your own database, storage, and Fabric item names unless an exercise explicitly requires otherwise.
 
 ## Fabric Explained Example
 
@@ -47,10 +55,10 @@ The existing event-processing example looks up a `Property` table in a Lakehouse
 
 ## Versions, Snapshots, and Licensing
 
-Use immutable, versioned releases so recordings and learners can use the same files. A suggested first approved version is `v1.0.0`; this is a naming recommendation, not an existing release. Courses should record the dataset version separately from the course version. Use a new version for any file or schema change rather than replacing an existing release asset.
+Use immutable, versioned releases so recordings and learners can use the same files. Operational tags contain the export completion timestamp and full run ID. Courses should record the dataset tag separately from the course version. Course-pinned releases are protected from rolling cleanup; do not use an unprotected nightly snapshot as a permanent course download. Use a new version for any file or schema change rather than replacing an existing release asset.
 
-CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or public export. Operational table definitions were verified from source metadata on 2026-11-20. Export dates, date coverage, row counts, CSV conventions, and the budget/event schemas are still unknown; no export date should be inferred from this documentation's date.
+CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or export. Operational table definitions were verified from source metadata on 2026-11-20. The protected export completed at 2026-11-20T17:04:46.170Z and contains 1,578,294 rows across eight tables. CSV conventions are in the operational guide. Record date coverage and budget/event schemas remain unconfirmed; do not infer record date coverage from the export timestamp.
 
-No data or code license has been selected, and no license grant or publication approval is implied. Before public release, the owner must confirm redistribution rights for all assets and choose appropriate license terms for data, documentation, and tooling. See [local validation and release packaging](RELEASE.md).
+Operational data assets are dedicated under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). This does not license repository code or documentation. Before making the repository public, complete the remaining source/privacy and license decisions. See [validation and release operations](RELEASE.md).
 
 Product setup references were checked against Microsoft documentation on 2026-11-19. Tenant availability, permissions, networking, costs, and end-to-end imports were not tested. See the dataset guides for official references and remaining setup gaps.

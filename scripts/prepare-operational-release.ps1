@@ -14,6 +14,7 @@ param(
     [string]$RunId,
     [ValidatePattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
     [string]$Repository = $env:GITHUB_REPOSITORY,
+    [switch]$RequireCurrentDay,
     [Parameter(Mandatory)]
     [string]$OutputDirectory
 )
@@ -121,6 +122,12 @@ foreach ($item in $items) {
 $markerPath = Join-Path $directoryPath '_SUCCESS.json'
 $marker = Read-ExportMarker -Path $markerPath
 $completed = [DateTimeOffset]::Parse($marker.completed_at_utc, [Globalization.CultureInfo]::InvariantCulture)
+if ($RequireCurrentDay) {
+    $now = [DateTimeOffset]::UtcNow
+    if ($completed.UtcDateTime.Date -ne $now.UtcDateTime.Date -or $completed -gt $now) {
+        throw 'Scheduled publishing requires a completed export from today (UTC), not a stale or future marker.'
+    }
+}
 if (@($marker.files).Count -ne $tables.Count) { throw 'Marker must contain exactly eight inventory entries.' }
 foreach ($table in $tables.Keys) {
     $entries = @($marker.files | Where-Object { $_.name -ceq "$table.csv" })

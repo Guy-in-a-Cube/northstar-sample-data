@@ -1,12 +1,19 @@
-name: Draft Operational Release
+name: Operational Data Releases
 
 on:
+  schedule:
+    - cron: '20 13 * * *'
   workflow_dispatch:
     inputs:
       run_id:
         description: Optional completed Fabric run ID; blank selects the newest completion marker
         required: false
         type: string
+      publish:
+        description: Publish after validation instead of leaving a draft
+        required: false
+        default: false
+        type: boolean
 
 permissions: {}
 
@@ -29,6 +36,8 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       EXPORT_STORAGE_ACCOUNT: ${{ vars.EXPORT_STORAGE_ACCOUNT }}
       EXPORT_CONTAINER: ${{ vars.EXPORT_CONTAINER }}
+      PROTECTED_OPERATIONAL_TAGS: >-
+        ["operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73"]
     steps:
       - name: Check out release tooling
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -62,6 +71,7 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or $actualClient -cne $env:AZURE_CLIENT_ID) { throw 'Unexpected Azure identity.' }
           $output = Join-Path $env:RUNNER_TEMP "northstar-release-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
           $parameters = @{ StorageAccount = $env:EXPORT_STORAGE_ACCOUNT; Container = $env:EXPORT_CONTAINER; OutputDirectory = $output }
+          if ($env:GITHUB_EVENT_NAME -ceq 'schedule') { $parameters.RequireCurrentDay = $true }
           if ($env:REQUESTED_RUN_ID) { $parameters.RunId = $env:REQUESTED_RUN_ID }
           $json = (& ./scripts/prepare-operational-release.ps1 @parameters) -join "`n"
           $plan = $json | ConvertFrom-Json
@@ -71,33 +81,15 @@ jobs:
           [IO.File]::WriteAllText($planPath, $json, [Text.UTF8Encoding]::new($false))
           [IO.File]::AppendAllText($env:GITHUB_OUTPUT, "plan_path=$planPath`n", [Text.UTF8Encoding]::new($false))
 
-      - name: Create and verify draft release
+      - name: Publish or draft and apply operational retention
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_PLAN: ${{ steps.prepare.outputs.plan_path }}
+          REQUESTED_PUBLISH: ${{ inputs.publish }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $plan = Get-Content -Raw -LiteralPath $env:RELEASE_PLAN | ConvertFrom-Json
-          $existingTags = @(gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name')
-          if ($LASTEXITCODE -ne 0) { throw 'Could not check existing releases.' }
-          if ($existingTags -ccontains $plan.tag) { throw 'A release for this run already exists; refusing to overwrite it.' }
-          $refs = @(gh api "repos/$env:GITHUB_REPOSITORY/git/matching-refs/tags/$($plan.tag)" | ConvertFrom-Json)
-          if ($LASTEXITCODE -ne 0) { throw 'Could not check existing Git tags.' }
-          if (@($refs | Where-Object { $_.ref -ceq "refs/tags/$($plan.tag)" }).Count -ne 0) { throw 'The release tag already exists.' }
-          foreach ($path in $plan.files) {
-            if ((Get-Item -LiteralPath $path).Length -ge 2GB) { throw 'An asset exceeds the GitHub release size limit.' }
-          }
-          gh release create $plan.tag @($plan.files) --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title $plan.title --notes-file $plan.notes --draft --latest=false
-          if ($LASTEXITCODE -ne 0) { throw 'Draft creation or asset upload failed; any partial draft must remain unpublished.' }
-          $pages = gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --slurp | ConvertFrom-Json -NoEnumerate
-          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the uploaded draft.' }
-          $matches = @(foreach ($page in $pages) { foreach ($release in $page) { if ($release.tag_name -ceq $plan.tag) { $release } } })
-          if ($matches.Count -ne 1 -or -not $matches[0].draft -or $matches[0].assets.Count -ne $plan.files.Count) { throw 'Draft release inventory verification failed.' }
-          foreach ($path in $plan.files) {
-            $file = Get-Item -LiteralPath $path
-            $assets = @($matches[0].assets | Where-Object { $_.name -ceq $file.Name })
-            $digest = 'sha256:' + (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
-            if ($assets.Count -ne 1 -or $assets[0].size -ne $file.Length -or $assets[0].digest -cne $digest) { throw "Uploaded asset verification failed: $($file.Name)" }
-          }
-          [IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, "Draft created and all 10 uploaded asset sizes and SHA-256 digests verified: $($matches[0].html_url)`nNo release was published.`n", [Text.UTF8Encoding]::new($false))
+          $protected = @($env:PROTECTED_OPERATIONAL_TAGS | ConvertFrom-Json)
+          $publish = $env:GITHUB_EVENT_NAME -ceq 'schedule' -or $env:REQUESTED_PUBLISH -ceq 'true'
+          $result = & ./scripts/publish-operational-release.ps1 -PlanPath $env:RELEASE_PLAN -Repository $env:GITHUB_REPOSITORY -Commit $env:GITHUB_SHA -ProtectedTags $protected -KeepSnapshots 7 -Publish:$publish -Apply
+          [IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, "$($result.status): $($result.url)`nOlder operational snapshots removed: $($result.delete.Count). Protected course releases retained.`n", [Text.UTF8Encoding]::new($false))
