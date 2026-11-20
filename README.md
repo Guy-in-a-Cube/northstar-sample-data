@@ -1,76 +1,25 @@
 # Northstar Sample Data
 
-Northstar is a sample property business used across training courses. This repository brings together operational records, planned property budgets, and property events without tying the data to a single course or platform.
+Static sample files for the fictional Northstar property business. Use the version specified by your course; files are not regenerated daily. Future updates will be published manually as new versions.
 
-**Current status: the first Operational Data, Property Budget, and Property Events versions are released.** Use the versioned downloads below. See the [verified schema and deployment instructions](schema/README.md).
+## Downloads
 
-## Download Operational Data
+| Files | Download | Contents |
+| --- | --- | --- |
+| SQL schema | [create-ops-tables.sql](schema/create-ops-tables.sql) | Eight empty operational tables in the `ops` schema |
+| Operational CSVs | [operations-data.zip](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73/operations-data.zip) | Eight CSVs under `operations-data/`; 1,578,294 rows in the November 20, 2026 snapshot |
+| Property Budget Excel | [NorthStar_PropertyBudget.xlsx](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-budget-v1.0.0/NorthStar_PropertyBudget.xlsx) | 384 monthly budgets for 16 properties, January 2025-December 2026 |
+| Property Events JSON | [property-events.zip](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-events-v1.0.0/property-events.zip) | Five NDJSON files under `property-events/`; 45 events dated August 31, 2026 |
 
-**[Download Operational Data](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73/operations-data.zip)**
+Individual CSVs and event files are available on their [operational](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73) and [event](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/property-events-v1.0.0) release pages. Data is stored in release assets, not regular Git files. Downloads require repository access while this repository is private.
 
-Extract the ZIP to get eight CSVs under `operations-data/`. It contains no verification files. The optional [validation bundle](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73/operations-data-validation.zip) contains the completion marker, manifest, and checksums separately.
+## Using the Files
 
-This link points to the protected first snapshot, not a changing latest release. Courses should use the exact snapshot referenced in their recordings. No data files need to be moved into a GitHub repository folder.
+- **SQL:** run the entire schema script in an empty destination database. Intended targets are SQL Server 2019+, Azure SQL Database, and the writable SQL database in Fabric, not Fabric Warehouse or read-only SQL endpoints. Existing target tables cause it to stop; the script creates tables, not data. Destination deployment/imports have not been tested. Preserve exported identity values when importing CSVs.
+- **CSV:** UTF-8 without BOM, comma-delimited, with headers and quoted text. Unquoted `\N` means NULL; `""` means empty text. Dates use `yyyy-MM-dd`; timestamps use `yyyy-MM-ddTHH:mm:ss.fff`; decimals use a dot and bits use `0`/`1`. All rows/columns, including audit fields and soft-deletes, are included. This is not a database-wide transactional snapshot. Optional [checksums and validation](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/operational-20261120T170446170Z-d6fa0db4-3b98-4163-940f-36ecaef08b73/operations-data-validation.zip) are separate from the data ZIP.
+- **Excel:** select `PropertyBudgetTable` and follow Microsoft's [Create a list based on a spreadsheet](https://support.microsoft.com/en-us/office/create-a-list-based-on-a-spreadsheet-380cfeb5-6e14-438e-988a-c2b9bea574fa) instructions in your own SharePoint site. Revenue is USD; occupancy is a fraction (`0.2322` means 23.22%). `PropertyCode` matches operational `Property.property_code`, not `property_id`. SharePoint import has not been tested here.
+- **JSON:** parse one JSON object per line, not a single JSON array. Upload the extracted files to your own private Blob container if required by your course. Event-type variations, two timestamps without timezones, and two unmatched property codes (`999`) are preserved; processing rules must handle them explicitly.
 
-## Download Property Budget
+## License
 
-[Download the Property Budget Excel workbook](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-budget-v1.0.0/NorthStar_PropertyBudget.xlsx). This version contains 384 monthly budget rows for 16 properties, January 2025-December 2026. Follow the [budget guide](property-budget/README.md) and its Microsoft documentation link to create your own SharePoint list. Mirroring is taught in the course, not in that guide.
-
-## Download Property Events
-
-**[Download Property Events ZIP](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-events-v1.0.0/property-events.zip)**
-
-Release and individual files: [Property Events v1.0.0](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/property-events-v1.0.0). Setup and data format: [Property Events README](property-events/README.md).
-
-Extract the ZIP to get five original NDJSON files under `property-events/`, containing 45 events dated August 31, 2026. It contains no verification files. Follow the linked guide to upload the files to your own private Blob container and access them through a Lakehouse Files shortcut. Original event-type variations, two timestamps without timezones, and two unmatched-property events are preserved.
-
-## Sources
-
-| Dataset | Business Purpose | Source System | Download Format |
-| --- | --- | --- | --- |
-| [Operational Data](operational-data/README.md) | Core business records, including properties and bookings | SQL Server | Eight CSVs; data ZIP and individual release assets |
-| [Property Budget](property-budget/README.md) | Planned property budgets | Maintainer's Excel; learner's SharePoint list | Versioned Excel workbook release asset |
-| [Property Events](property-events/README.md) | Events associated with properties | Azure Blob Storage | Five original NDJSON files; data ZIP and individual release assets |
-
-GitHub distributes the sample files. It is not the SQL Server, SharePoint, or blob storage source system used in course exercises. You provision your own sources from public exports, or use the member database option for operational data.
-
-**Membership is not required for public sample-file downloads.** Operational, Property Budget, and Property Events data have separate owner approvals for redistribution under CC0 1.0. The owner has also approved CC0 1.0 for the repository's code and documentation.
-
-## Start Here: Cube Members
-
-1. For the SQL Server path, use the private connection instructions provided through The Cube to connect to `NorthStar_public`. No private server addresses, authentication details, or connection instructions belong in this repository.
-2. Alternatively, use the operational CSV download above. Members can choose either path.
-3. Use your own SharePoint list for Property Budget and your own storage for Property Events. See each dataset guide for its setup and readiness checks.
-
-## Start Here: Public Exports
-
-1. Use the immutable dataset release referenced by your course. Download its data ZIP, or the individual CSVs from that same version. The operational link above is the first released snapshot.
-2. Follow [Operational Data](operational-data/README.md) to load CSVs into your own SQL Server database, or import them directly into a Fabric Lakehouse or Warehouse.
-3. Follow [Property Budget](property-budget/README.md) to create your own SharePoint list from a versioned Excel workbook. Excel remains the maintainer's authoritative source; your list is your working copy.
-4. Follow [Property Events](property-events/README.md) to upload the released JSON files to your own blob storage, preserving their directory structure.
-
-Event processing rules remain pending; the event guide records the released 45-event NDJSON source and its preserved variations. The budget guide links to Microsoft's Excel-to-SharePoint instructions; no maintainer-run import test is planned. You can prepare empty operational tables using the [SQL database deployment script and instructions](schema/README.md). Platform-specific SQL deployment/import tests are still required. Choose your own database, storage, and Fabric item names unless an exercise explicitly requires otherwise.
-
-## Fabric Explained Example
-
-This example describes one course's topology, not a requirement for using the dataset:
-
-| Dataset | Example Path |
-| --- | --- |
-| Operational Data | SQL Server to Fabric using a Copy Job |
-| Property Budget | The learner's SharePoint list mirrored into Fabric; the Excel seed itself is not mirrored |
-| Property Events | Azure Blob Storage accessed through a shortcut in Lakehouse Files; separate processing is needed to produce tables |
-
-Direct operational CSV imports into Fabric skip the database Copy Job step. They do not reproduce the database connectivity exercise.
-
-The existing event-processing example looks up a `Property` table in a Lakehouse. Warehouse-only operational imports may require an adjustment to that example or a compatible Lakehouse table. The example code and schema were not supplied, so compatibility is not verified. Do not assume a Warehouse-only path works unchanged.
-
-## Versions, Snapshots, and Licensing
-
-Use immutable, versioned releases so recordings and learners can use the same files. Operational tags contain the export completion timestamp and full run ID. Courses should record the dataset tag separately from the course version. Course-pinned releases are protected from rolling cleanup; do not use an unprotected nightly snapshot as a permanent course download. Use a new version for any file or schema change rather than replacing an existing release asset.
-
-CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or export. Operational table definitions were verified from source metadata on 2026-11-20. The protected export completed at 2026-11-20T17:04:46.170Z and contains 1,578,294 rows across eight tables. CSV conventions are in the operational guide. The budget guide records the verified property/month grain and January 2025-December 2026 workbook coverage. The event guide records observed fields and stored dates separately from unresolved timezone and processing rules. Full operational record date coverage and SharePoint types remain unconfirmed; do not infer record date coverage from the export timestamp.
-
-Operational, Property Budget, and Property Events data assets have separate owner-approved [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) dedications. On 2026-11-20, the owner also approved CC0 1.0 for maintainer-owned repository code and documentation; see [LICENSE](LICENSE) for the full terms. This does not waive third-party rights, trademarks, or patents. Review new content for privacy before publication and preserve repository protections. See [validation and release operations](RELEASE.md).
-
-Product setup references were checked against Microsoft documentation on 2026-11-19. Tenant availability, permissions, networking, costs, and end-to-end imports were not tested. See the dataset guides for official references and remaining setup gaps.
+The released synthetic data and maintainer-owned code/documentation are dedicated under CC0 1.0, with separate owner approvals. See [LICENSE](LICENSE). Third-party rights, trademarks, and patents are not waived.
