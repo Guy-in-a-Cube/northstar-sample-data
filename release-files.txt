@@ -3,6 +3,7 @@ operational-data/README.md
 property-budget/README.md
 property-events/README.md
 schema/README.md
+schema/create-ops-tables.sql
 RELEASE.md
 release-files.txt
 scripts/package-release.ps1

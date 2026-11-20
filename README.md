@@ -2,7 +2,7 @@
 
 Northstar is a sample property business used across training courses. This repository brings together operational records, planned property budgets, and property events without tying the data to a single course or platform.
 
-**Current status: documentation and local packaging tools only. No source data files were supplied.** There are no downloadable datasets or published releases yet. See the [schema evidence and missing assets](schema/README.md).
+**Current status: learner documentation, an operational table deployment script, and local packaging tools. No source data files were supplied.** There are no downloadable datasets or published releases yet. See the [verified schema, deployment instructions, and missing assets](schema/README.md).
 
 ## Sources
 
@@ -29,7 +29,7 @@ GitHub distributes the sample files. It is not the SQL Server, SharePoint, or bl
 3. Follow [Property Budget](property-budget/README.md) to seed your own SharePoint list from its CSV.
 4. Follow [Property Events](property-events/README.md) to upload the JSON files to your own blob storage, preserving their directory structure.
 
-These paths are blocked until the source files and verified import conventions are supplied. Choose your own database, storage, and Fabric item names unless an exercise explicitly requires otherwise.
+Data loading is blocked until the source files and verified import conventions are supplied. You can prepare empty operational tables using the [SQL database deployment script and instructions](schema/README.md). Choose your own database, storage, and Fabric item names unless an exercise explicitly requires otherwise.
 
 ## Fabric Explained Example
 
@@ -49,7 +49,7 @@ The existing event-processing example looks up a `Property` table in a Lakehouse
 
 Use immutable, versioned releases so recordings and learners can use the same files. A suggested first approved version is `v1.0.0`; this is a naming recommendation, not an existing release. Courses should record the dataset version separately from the course version. Use a new version for any file or schema change rather than replacing an existing release asset.
 
-CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or public export. Export dates, date coverage, row counts, CSV conventions, and schema details are currently unknown; no export date should be inferred from this documentation's date.
+CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or public export. Operational table definitions were verified from source metadata on 2026-11-20. Export dates, date coverage, row counts, CSV conventions, and the budget/event schemas are still unknown; no export date should be inferred from this documentation's date.
 
 No data or code license has been selected, and no license grant or publication approval is implied. Before public release, the owner must confirm redistribution rights for all assets and choose appropriate license terms for data, documentation, and tooling. See [local validation and release packaging](RELEASE.md).
 

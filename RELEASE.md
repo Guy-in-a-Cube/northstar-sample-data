@@ -1,6 +1,6 @@
 # Local Validation and Release Packaging
 
-This repository is not release-ready: all three datasets, authoritative schema information, redistribution confirmation, and license selection are missing. No release has been published. Local ZIP creation is not authorization to redistribute anything.
+This repository is not release-ready: all three datasets, business definitions, budget/event schema information, redistribution confirmation, and license selection are missing. Operational table metadata has been inspected and a [table deployment script](schema/create-ops-tables.sql) is available. No release has been published. Local ZIP creation is not authorization to redistribute anything.
 
 ## Validation
 
@@ -14,6 +14,8 @@ The [packaging script](scripts/package-release.ps1) validates the explicit [file
 
 Current result: documentation checks are possible, but there are no CSVs or JSON files to parse, count records in, or inspect for sensitive values. Absence of data is not a successful data-validation result.
 
+SQL script validation is separate from the packager. The operational script was checked with Microsoft's offline SQL Server 2019 syntax parser and compared with inspected source metadata. The packager does not repeat SQL syntax or schema comparisons. Authorized tests against the intended database platforms are still required to verify deployment, rollback, and existing-object rejection; no deployment has been run.
+
 ## Prepare Approved Assets
 
 1. Obtain the actual source files and provenance. Put operational exports under `operational-data/csv/`, the budget seed in `property-budget/`, and JSON under `property-events/json/`, preserving meaningful subdirectories. Create these data directories only when adding real assets.
@@ -21,7 +23,7 @@ Current result: documentation checks are possible, but there are no CSVs or JSON
 3. Verify CSV encoding/BOM, delimiter, headers, quoting, field counts, null conventions, date formats, and parsed record counts using those established settings. Reconcile exported counts with export evidence. Verify JSON syntax, envelope, record counts, and relationships using supplied definitions. No CSV validation settings can be provided yet; the packaging script is not a substitute for these checks.
 4. Review every proposed public file, including filenames and nested JSON, for real personal information, internal identifiers/addresses, private endpoints, connection strings, credentials, tokens, SAS parameters, and third-party notices. Automated checks cannot establish that data is synthetic or redistributable. Do not reproduce any discovered secrets in review reports; remove or replace affected assets through an approved process. Never include Cube-only connection instructions.
 5. Ask the owner to confirm redistribution rights for every source and choose a suitable data license, with an explicit decision about documentation and tooling coverage. Add approved terms only after that confirmation. No license terms have been added here.
-6. Add each approved file by its exact relative path to the file list. No wildcards or automatic directory inclusion are used. Include approved license files in the list when they exist. This list initially selects only the documentation and packaging tools created locally; it is not evidence of publication approval.
+6. Add each approved file by its exact relative path to the file list. No wildcards or automatic directory inclusion are used. Include approved license files in the list when they exist. The current list selects learner documentation, the operational deployment script, and packaging tools; it is not evidence of publication approval.
 
 ## Build a Local Candidate
 
