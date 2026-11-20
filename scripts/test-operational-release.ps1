@@ -39,6 +39,7 @@ function Reset-Fixture {
 
 function Write-Marker {
     param([object]$Value)
+    if ($Value.completed_at_utc -is [DateTime]) { $Value.completed_at_utc = $timestamp }
     [IO.File]::WriteAllText((Join-Path $fixture '_SUCCESS.json'), ($Value | ConvertTo-Json -Depth 5), $encoding)
 }
 
