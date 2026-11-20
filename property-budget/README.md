@@ -2,13 +2,19 @@
 
 Property Budget represents planned property budgets. The maintainer's Excel workbook is the authoritative distribution source. Each learner creates their own SharePoint list from a versioned workbook as their working copy. The maintainer's demo list is not the distribution source.
 
+## Download
+
+[Download the Property Budget Excel workbook](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-budget-v1.0.0/NorthStar_PropertyBudget.xlsx) from [Property Budget v1.0.0](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/property-budget-v1.0.0). Repository access is required while the repository is private. This is a release asset, not a workbook stored in regular Git files.
+
+The released workbook contains 384 rows for January 2025-December 2026. Its SHA-256 is `280218f7067c528c0c80ce34c0f355037c16d5b809b056d13067e7720b6ba394`. The distribution copy excludes hidden SharePoint custom/document-management metadata and deleted-package parts. Worksheet, table, shared strings, workbook definition, and formatting parts match the original byte-for-byte; the original workbook was not modified.
+
 ## Included Files and Evidence
 
-Only this guide is included in the repository; no budget workbook has been copied or published. Read-only inspection of the supplied workbook on 2026-11-20 verified one sheet, an Excel table named `PropertyBudgetTable`, five columns, and 384 data rows: 16 properties for each of 24 months, January 2025 through December 2026. All months start on the first day, with no duplicate property/month pairs. No formulas, macros, or external workbook links were found.
+The workbook is distributed through the versioned release above. Read-only inspection of the supplied workbook on 2026-11-20 verified one sheet, an Excel table named `PropertyBudgetTable`, five columns, and 384 data rows: 16 properties for each of 24 months, January 2025 through December 2026. All months start on the first day, with no duplicate property/month pairs. No formulas, macros, or external workbook links were found.
 
 All 16 property codes and names match the verified operational snapshot. `PropertyCode` maps to operational `Property.property_code`, not `property_id` or a SharePoint-generated item ID. Operational inventory in that snapshot spans January 2023 through November 2026; the workbook has no 2023-2024 budgets. Historical backfill is a separate decision, not an implied requirement.
 
-The existing SharePoint list could not be inspected because access required sign-in. Its column definitions and equality with the workbook are unverified. On 2026-11-20, the owner confirmed all revenue amounts are USD and approved 3% annual revenue growth with unchanged prior-year occupancy for future extensions. These are owner-approved business assumptions, not deductions from workbook formatting. Budget redistribution approval and budget licensing remain unresolved. Operational data's CC0 dedication does not automatically cover this workbook.
+The existing SharePoint list could not be inspected because access required sign-in. Its column definitions and equality with the workbook are unverified. On 2026-11-20, the owner confirmed all revenue amounts are USD and approved 3% annual revenue growth with unchanged prior-year occupancy for future extensions. These are owner-approved business assumptions, not deductions from workbook formatting. The owner separately confirmed the budget data is synthetic and approved redistribution under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). That dedication covers budget data, not repository code or documentation.
 
 ## Workbook Contract
 
@@ -37,7 +43,7 @@ This defines maintenance behavior, not authorization to generate or publish new 
 
 ## Budget Releases
 
-Publish the reviewed Excel workbook as a versioned budget release asset. A matching CSV may be offered separately after its encoding, date, null, and precision conventions are defined; it is not the primary consumer setup route. No release or budget download link exists yet.
+The first reviewed workbook is published as `property-budget-v1.0.0`, paired with the protected operational snapshot linked in its release notes. Future reviewed workbooks receive new budget versions. A matching CSV may be offered separately after its encoding, date, null, and precision conventions are defined; it is not the primary consumer setup route.
 
 Record the budget version, workbook SHA-256, table name, row count, month coverage, currency, generation assumptions, and paired operational snapshot tag in separate release metadata. Keep verification metadata separate from the learner's workbook. Do not depend on a maintainer's local course folder for cloud automation.
 
