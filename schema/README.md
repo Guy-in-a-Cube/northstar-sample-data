@@ -8,7 +8,7 @@ The [table deployment script](create-ops-tables.sql) recreates the inspected tab
 | --- | --- | --- | --- |
 | Operational Data | Table deployment script; no CSVs | Columns, SQL types, nullability, identity settings, keys, defaults, checks, and indexes verified from metadata | No foreign keys; business joins and source date coverage not verified |
 | Property Budget | Versioned workbook release; see budget guide | Five columns; 384 rows at property/calendar-month grain; logical key is property code + month, not an enforced database key | All 16 codes/names match the operational Property snapshot; January 2025-December 2026; SharePoint types unverified |
-| Property Events | None | Not available | Not available |
+| Property Events | Versioned release: five original NDJSON files; see event guide | Eight observed fields; one event object per line; 45 distinct event IDs, not an enforced key | `property_code` matches operational Property for 43 events; two use unmatched code 999. Stored dates are 2026-08-31; two timestamps omit timezone. |
 
 ## Operational Tables
 
@@ -83,9 +83,9 @@ Record keys, constraints, SQL types, relationships, and business definitions onl
 
 - Approved operational CSV exports, including the supplied filenames for property and booking records.
 - Property Budget planning horizon/new-property baselines. The first workbook is released under the owner's synthetic-data/CC0 approval; USD, 3% annual revenue growth, and unchanged prior-year occupancy are owner-approved, but no new rows have been generated. Consumer SharePoint setup uses Microsoft documentation, with no maintainer-run import test; actual list column definitions remain unverified. An optional CSV would need its own verified conventions.
-- The original Property Events JSON files with their directory structure preserved.
+- Property Events processing rules. The first snapshot is released under the owner's separate synthetic-data/CC0 approval. The five original root-level files, NDJSON format, eight fields, 45 records, and source checksums are verified in the [event guide](../property-events/README.md); normalization, unzoned timestamps, and unmatched-property handling need explicit decisions.
 - A confirmed business dictionary, including table grain, intended joins, and the property identifier used across sources. Operational SQL definitions have been inspected; business meanings remain a separate evidence gap.
 - Export dates, source date coverage, row counts, and documented CSV conventions.
 - The event-processing example's expected Lakehouse Property table schema and lookup behavior.
 
-Operational source-schema facts are verified from the metadata inspection; export verification is tracked in the operational guide. Budget workbook columns, snapshot grain, property-code matches, row count, and month coverage are verified separately from its untested SharePoint types and proposed planning horizon. Business definitions, full source date coverage, and event JSON structure still need evidence. Event licensing and redistribution approval remain pending; operational and budget data have separate owner-approved CC0 dedications. Return to the [repository guide](../README.md).
+Operational source-schema facts are verified from the metadata inspection; export verification is tracked in the operational guide. Budget workbook columns, snapshot grain, property-code matches, row count, and month coverage are verified separately from its untested SharePoint types and proposed planning horizon. Event NDJSON structure, observed field types, counts, dates, and property-code matches are verified for the released files, not guaranteed for future events. Business definitions, full operational source date coverage, and event processing rules still need evidence. All three datasets have separate owner-approved CC0 data dedications; code and documentation licensing remains unselected. Return to the [repository guide](../README.md).
