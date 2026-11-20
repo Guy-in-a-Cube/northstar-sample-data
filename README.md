@@ -34,7 +34,7 @@ Extract the ZIP to get five original NDJSON files under `property-events/`, cont
 
 GitHub distributes the sample files. It is not the SQL Server, SharePoint, or blob storage source system used in course exercises. You provision your own sources from public exports, or use the member database option for operational data.
 
-**Membership will not be required to download the public sample files once the repository is public.** Operational, Property Budget, and Property Events data have separate owner approvals for redistribution under CC0 1.0. Code/documentation license decisions remain pending; public access is not enabled yet.
+**Membership will not be required to download the public sample files once the repository is public.** Operational, Property Budget, and Property Events data have separate owner approvals for redistribution under CC0 1.0. The owner has also approved CC0 1.0 for the repository's code and documentation; public access is not enabled yet.
 
 ## Start Here: Cube Members
 
@@ -71,6 +71,6 @@ Use immutable, versioned releases so recordings and learners can use the same fi
 
 CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or export. Operational table definitions were verified from source metadata on 2026-11-20. The protected export completed at 2026-11-20T17:04:46.170Z and contains 1,578,294 rows across eight tables. CSV conventions are in the operational guide. The budget guide records the verified property/month grain and January 2025-December 2026 workbook coverage. The event guide records observed fields and stored dates separately from unresolved timezone and processing rules. Full operational record date coverage and SharePoint types remain unconfirmed; do not infer record date coverage from the export timestamp.
 
-Operational, Property Budget, and Property Events data assets are dedicated under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). This does not license repository code or documentation. Before making the repository public, complete the remaining privacy, repository-protection, and code/documentation license decisions. See [validation and release operations](RELEASE.md).
+Operational, Property Budget, and Property Events data assets have separate owner-approved [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) dedications. On 2026-11-20, the owner also approved CC0 1.0 for maintainer-owned repository code and documentation; see [LICENSE](LICENSE) for the full terms. This does not waive third-party rights, trademarks, or patents. Before making the repository public, complete the remaining privacy and repository-protection checks. See [validation and release operations](RELEASE.md).
 
 Product setup references were checked against Microsoft documentation on 2026-11-19. Tenant availability, permissions, networking, costs, and end-to-end imports were not tested. See the dataset guides for official references and remaining setup gaps.

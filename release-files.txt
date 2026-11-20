@@ -7,3 +7,4 @@ schema/create-ops-tables.sql
 RELEASE.md
 release-files.txt
 scripts/package-release.ps1
+LICENSE

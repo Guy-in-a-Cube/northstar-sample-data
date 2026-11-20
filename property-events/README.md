@@ -46,7 +46,7 @@ Every observed record has these eight fields. Types and null counts describe thi
 - Against the verified operational Property snapshot, 43 events match the 16 property codes. Two events use code `999`, which has no matching property. Do not replace those codes or silently discard their events. Lookup and unmatched-record handling must be explicit.
 - No missing fields or duplicate event IDs were observed. Null room numbers are present; null handling should not replace them with an invented room identifier.
 
-Review of all records and screening for URLs, email addresses, storage keys, SAS signatures, and local-path markers found no such markers. On 2026-11-20, the owner separately confirmed these event records are synthetic and approved publishing the original files under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). This dedication covers Property Events data, not repository code or documentation. Source variations were preserved, not normalized.
+Review of all records and screening for URLs, email addresses, storage keys, SAS signatures, and local-path markers found no such markers. On 2026-11-20, the owner separately confirmed these event records are synthetic and approved publishing the original files under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). This dedication covers Property Events data; maintainer-owned repository code and documentation have a separate CC0 approval under [LICENSE](../LICENSE). Source variations were preserved, not normalized.
 
 ## General Source Setup
 
