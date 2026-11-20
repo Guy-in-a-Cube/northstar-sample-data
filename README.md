@@ -2,7 +2,7 @@
 
 Northstar is a sample property business used across training courses. This repository brings together operational records, planned property budgets, and property events without tying the data to a single course or platform.
 
-**Current status: the first operational CSV snapshot is released; Property Budget and Property Events sources are still pending.** This repository is currently private, so download links require repository access until the owner makes it public. See the [verified schema and deployment instructions](schema/README.md).
+**Current status: the first operational CSV snapshot is released; the Property Budget workbook has been inspected but is not published; Property Events sources are still pending.** This repository is currently private, so download links require repository access until the owner makes it public. See the [verified schema and deployment instructions](schema/README.md).
 
 ## Download Operational Data
 
@@ -17,7 +17,7 @@ This link points to the protected first snapshot, not a changing latest release.
 | Dataset | Business Purpose | Source System | Download Format |
 | --- | --- | --- | --- |
 | [Operational Data](operational-data/README.md) | Core business records, including properties and bookings | SQL Server | Eight CSVs; data ZIP and individual release assets |
-| [Property Budget](property-budget/README.md) | Planned property budgets | SharePoint list | Seed CSV; not yet supplied |
+| [Property Budget](property-budget/README.md) | Planned property budgets | Maintainer's Excel; learner's SharePoint list | Versioned Excel workbook planned; not yet published |
 | [Property Events](property-events/README.md) | Events associated with properties | Azure Blob Storage | JSON files; not yet supplied |
 
 GitHub distributes the sample files. It is not the SQL Server, SharePoint, or blob storage source system used in course exercises. You provision your own sources from public exports, or use the member database option for operational data.
@@ -34,10 +34,10 @@ GitHub distributes the sample files. It is not the SQL Server, SharePoint, or bl
 
 1. Use the immutable dataset release referenced by your course. Download its data ZIP, or the individual CSVs from that same version. The operational link above is the first released snapshot.
 2. Follow [Operational Data](operational-data/README.md) to load CSVs into your own SQL Server database, or import them directly into a Fabric Lakehouse or Warehouse.
-3. Follow [Property Budget](property-budget/README.md) to seed your own SharePoint list from its CSV.
+3. Follow [Property Budget](property-budget/README.md) to create your own SharePoint list from a versioned Excel workbook once published. Excel remains the maintainer's authoritative source; your list is your working copy.
 4. Follow [Property Events](property-events/README.md) to upload the JSON files to your own blob storage, preserving their directory structure.
 
-Budget/event loading remains blocked until their source files and verified conventions are supplied. You can prepare empty operational tables using the [SQL database deployment script and instructions](schema/README.md). Platform-specific SQL deployment/import tests are still required. Choose your own database, storage, and Fabric item names unless an exercise explicitly requires otherwise.
+Budget workbook publication remains pending, as do event source files and conventions. The budget guide links to Microsoft's Excel-to-SharePoint instructions; no maintainer-run import test is planned. You can prepare empty operational tables using the [SQL database deployment script and instructions](schema/README.md). Platform-specific SQL deployment/import tests are still required. Choose your own database, storage, and Fabric item names unless an exercise explicitly requires otherwise.
 
 ## Fabric Explained Example
 
@@ -46,7 +46,7 @@ This example describes one course's topology, not a requirement for using the da
 | Dataset | Example Path |
 | --- | --- |
 | Operational Data | SQL Server to Fabric using a Copy Job |
-| Property Budget | The learner's SharePoint list mirrored into Fabric; the seed CSV itself is not mirrored |
+| Property Budget | The learner's SharePoint list mirrored into Fabric; the Excel seed itself is not mirrored |
 | Property Events | Azure Blob Storage accessed through a shortcut in Lakehouse Files; separate processing is needed to produce tables |
 
 Direct operational CSV imports into Fabric skip the database Copy Job step. They do not reproduce the database connectivity exercise.
@@ -57,7 +57,7 @@ The existing event-processing example looks up a `Property` table in a Lakehouse
 
 Use immutable, versioned releases so recordings and learners can use the same files. Operational tags contain the export completion timestamp and full run ID. Courses should record the dataset tag separately from the course version. Course-pinned releases are protected from rolling cleanup; do not use an unprotected nightly snapshot as a permanent course download. Use a new version for any file or schema change rather than replacing an existing release asset.
 
-CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or export. Operational table definitions were verified from source metadata on 2026-11-20. The protected export completed at 2026-11-20T17:04:46.170Z and contains 1,578,294 rows across eight tables. CSV conventions are in the operational guide. Record date coverage and budget/event schemas remain unconfirmed; do not infer record date coverage from the export timestamp.
+CSV exports are snapshots. The live database may change independently, so live counts and values can differ from a recorded course or export. Operational table definitions were verified from source metadata on 2026-11-20. The protected export completed at 2026-11-20T17:04:46.170Z and contains 1,578,294 rows across eight tables. CSV conventions are in the operational guide. The budget guide records the verified property/month grain and January 2025-December 2026 workbook coverage. Full operational record date coverage, SharePoint types, and event schemas remain unconfirmed; do not infer record date coverage from the export timestamp.
 
 Operational data assets are dedicated under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). This does not license repository code or documentation. Before making the repository public, complete the remaining source/privacy and license decisions. See [validation and release operations](RELEASE.md).
 

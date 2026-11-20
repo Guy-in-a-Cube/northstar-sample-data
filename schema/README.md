@@ -7,7 +7,7 @@ The [table deployment script](create-ops-tables.sql) recreates the inspected tab
 | Dataset | Files available | Verified schema, grain, and identifiers | Verified relationships and coverage |
 | --- | --- | --- | --- |
 | Operational Data | Table deployment script; no CSVs | Columns, SQL types, nullability, identity settings, keys, defaults, checks, and indexes verified from metadata | No foreign keys; business joins and source date coverage not verified |
-| Property Budget | None | Not available | Not available |
+| Property Budget | Maintainer's workbook inspected read-only; not published | Five columns; 384 rows at property/calendar-month grain; logical key is property code + month, not an enforced database key | All 16 codes/names match the operational Property snapshot; January 2025-December 2026; SharePoint types unverified |
 | Property Events | None | Not available | Not available |
 
 ## Operational Tables
@@ -73,6 +73,8 @@ For each approved export, record its actual relative path, business purpose, pro
 
 For CSV files, verify encoding (including BOM presence), delimiter, quoting, headers, null representation, date formats, parsed data-row count excluding the header, and any embedded newlines. An empty field alone does not establish whether the source value was NULL or an empty string. Preserve identifiers as text until authoritative metadata establishes their types and formatting.
 
+For the budget Excel workbook, follow the [workbook and maintenance contract](../property-budget/README.md). Check the named table's bounds, real date values, stored occupancy fractions, numeric precision, property/month uniqueness, and approved coverage. Excel display formats are not proof of currency semantics or SharePoint column types.
+
 For JSON files, document the actual envelope, record grain, field paths, timestamp formats and timezones, missing-versus-null behavior, and meaningful directory layout. Do not equate file counts with event counts.
 
 Record keys, constraints, SQL types, relationships, and business definitions only when supported by authoritative source metadata, source DDL, or a confirmed data dictionary. Values that happen to be unique in a snapshot are not proof of a primary key. Do not generate table definitions from CSV type guesses.
@@ -80,10 +82,10 @@ Record keys, constraints, SQL types, relationships, and business definitions onl
 ## Evidence Still Needed
 
 - Approved operational CSV exports, including the supplied filenames for property and booking records.
-- The Property Budget seed CSV and its SharePoint list column definitions.
+- Approved publication of the inspected Property Budget workbook and planning horizon/new-property baselines. USD, 3% annual revenue growth, and unchanged prior-year occupancy are owner-approved; no new rows have been generated. Consumer SharePoint setup uses Microsoft documentation, with no maintainer-run import test; actual list column definitions remain unverified. An optional CSV would need its own verified conventions.
 - The original Property Events JSON files with their directory structure preserved.
 - A confirmed business dictionary, including table grain, intended joins, and the property identifier used across sources. Operational SQL definitions have been inspected; business meanings remain a separate evidence gap.
 - Export dates, source date coverage, row counts, and documented CSV conventions.
 - The event-processing example's expected Lakehouse Property table schema and lookup behavior.
 
-Operational source-schema facts are now verified from the metadata inspection. CSV parsing, exported row counts, source date coverage, budget definitions, and event JSON structure remain unverified until the actual assets are supplied. Licensing and redistribution approval are still pending. Return to the [repository guide](../README.md).
+Operational source-schema facts are verified from the metadata inspection; export verification is tracked in the operational guide. Budget workbook columns, snapshot grain, property-code matches, row count, and month coverage are now verified separately from its untested SharePoint types and proposed maintenance rules. Business definitions, full source date coverage, and event JSON structure still need evidence. Budget/event licensing and redistribution approval remain pending. Return to the [repository guide](../README.md).

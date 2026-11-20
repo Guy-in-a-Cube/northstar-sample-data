@@ -6,7 +6,9 @@ Northstar's core business records include properties and bookings. The intended 
 
 This guide is accompanied by the [operational table deployment script](../schema/create-ops-tables.sql) and [verified schema reference](../schema/README.md). On 2026-11-20, read-only metadata inspection verified the eight `ops` table definitions, including types, nullability, identity settings, keys, defaults, checks, and indexes. No foreign keys were found; intended business joins remain unconfirmed.
 
-No operational CSVs or business dictionary were supplied, so there is no `csv/` directory yet. Export filenames, business grain, cross-source relationships, exported row counts, and date coverage remain unverified. See [schema evidence](../schema/README.md) for the table inventory and remaining inputs.
+No operational CSVs have been published in this repository, so there is no `csv/` directory yet. The export contract covers `Booking.csv`, `Channel.csv`, `Experience.csv`, `Guest.csv`, `Property.csv`, `PropertyDailyInventory.csv`, `SatisfactionSurvey.csv`, and `StayNight.csv`. Business grain, cross-source relationships, and date coverage remain unconfirmed. See [schema evidence](../schema/README.md) for the table inventory and remaining inputs.
+
+Full-table CSVs can exceed GitHub's 100 MiB regular Git file limit. A future publishing workflow must use an approved delivery path for oversized files while preserving the one-file-per-table contract.
 
 ## General Loading Paths
 
@@ -28,9 +30,19 @@ Readiness checks: the expected tables, not merely uploaded files, are present; t
 
 ## Import Considerations
 
-Encoding, BOM, delimiter, quoting, null conventions, and date formats have not been verified because no CSVs exist here. Do not assume UTF-8, comma separators, ISO dates, or empty-field-as-NULL behavior. Preserve leading zeros and avoid locale-dependent date or numeric conversions. Count parsed CSV records, not physical lines, because quoted values can contain newlines. Determine a safe reload strategy before importing again to avoid duplicates or accidental replacement.
+The export contract is UTF-8 without BOM, comma separators, headers in source column order, and LF record separators. Text is double-quoted, with embedded quotes doubled. The reserved `\N` marker means NULL; an empty string is not NULL. Export queries reject literal source strings equal to that marker. Dates use `yyyy-MM-dd`, timestamps retain milliseconds as `yyyy-MM-ddTHH:mm:ss.fff` without timezone conversion, decimals use a dot and no grouping, and bits use `0` or `1`. Identifiers are preserved, rows are ordered by each table's primary key, and all rows and columns are included, including soft-deletes and audit fields.
+
+Private export runs use a unique run folder. `_SUCCESS.json` is written only after all eight CSV activities succeed; it identifies the run and lists each filename, row count, and byte count. Consumers must ignore folders without a valid marker and verify that all eight files match its inventory before using a snapshot. The marker indicates successful copying, not independent content validation. The source must remain unchanged during the export window; separate table queries do not create a database-wide transactional snapshot.
+
+Preserve leading zeros and avoid locale-dependent date or numeric conversions. Count parsed CSV records, not physical lines, because quoted values can contain newlines. Determine a safe reload strategy before importing again to avoid duplicates or accidental replacement.
 
 Exports are snapshots. Live operational data can evolve independently; repeatable exercises should use one release consistently.
+
+## Export Operations
+
+The nightly schedule is configured for 12:00 UTC daily, corresponding to fixed 06:00 CST (UTC-6) year-round, not daylight-saving-aware Central time. Copy activities allow two retries, 120 seconds apart. Scheduled failures use Fabric's failure-notification settings; those notifications do not cover manual runs.
+
+Operational run blobs are eligible for lifecycle deletion after more than seven days since their last modification, including incomplete runs. Lifecycle deletion is asynchronous and evaluates individual blobs, not whole snapshots atomically; consumers must still verify the complete marker inventory. Existing storage soft-delete protection can retain recoverable deleted blobs for an additional seven days. Test prefixes and unrelated data are outside the lifecycle rule. This storage policy does not define retention for future GitHub releases.
 
 ## Fabric Explained Only
 
