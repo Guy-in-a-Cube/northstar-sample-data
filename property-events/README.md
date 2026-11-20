@@ -4,7 +4,7 @@ Property Events represents events associated with properties. JSON is the distri
 
 ## Download
 
-**[Download Property Events ZIP](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-events-v1.0.0/property-events.zip)** from [Property Events v1.0.0](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/property-events-v1.0.0). Repository access is required while the repository is private.
+**[Download Property Events ZIP](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-events-v1.0.0/property-events.zip)** from [Property Events v1.0.0](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/property-events-v1.0.0).
 
 Extract the ZIP to get five original files under `property-events/`. The ZIP contains only event data; verification details are in the release notes. Individual JSON files are also assets on the same release. Upload the extracted event files, not the ZIP or release notes, to your own private Blob container. Source account and container names are not required.
 

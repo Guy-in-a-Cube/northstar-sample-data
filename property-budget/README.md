@@ -4,7 +4,7 @@ Property Budget represents planned property budgets. The maintainer's Excel work
 
 ## Download
 
-[Download the Property Budget Excel workbook](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-budget-v1.0.0/NorthStar_PropertyBudget.xlsx) from [Property Budget v1.0.0](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/property-budget-v1.0.0). Repository access is required while the repository is private. This is a release asset, not a workbook stored in regular Git files.
+[Download the Property Budget Excel workbook](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/download/property-budget-v1.0.0/NorthStar_PropertyBudget.xlsx) from [Property Budget v1.0.0](https://github.com/Guy-in-a-Cube/northstar-sample-data/releases/tag/property-budget-v1.0.0). This is a release asset, not a workbook stored in regular Git files.
 
 The released workbook contains 384 rows for January 2025-December 2026. Its SHA-256 is `280218f7067c528c0c80ce34c0f355037c16d5b809b056d13067e7720b6ba394`. The distribution copy excludes hidden SharePoint custom/document-management metadata and deleted-package parts. Worksheet, table, shared strings, workbook definition, and formatting parts match the original byte-for-byte; the original workbook was not modified.
 

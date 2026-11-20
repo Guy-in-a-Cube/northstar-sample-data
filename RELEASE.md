@@ -1,6 +1,6 @@
 # Local Validation and Release Packaging
 
-The first versions of all three datasets are released, but public launch remains pending repository protections and final privacy review. On 2026-11-20, the owner also approved CC0 1.0 for maintainer-owned repository code and documentation; the full terms are in [LICENSE](LICENSE). Five original event files are released unchanged as NDJSON under the owner's separate synthetic-data/CC0 approval; processing rules and business definitions remain unverified. The first budget workbook is released under the owner's synthetic-data/CC0 approval, with its Excel-authoritative maintenance contract documented in the budget guide. Consumer Excel-to-SharePoint setup links to Microsoft documentation; no maintainer-run import test is planned. The owner has approved the eight operational tables as synthetic and redistributable under CC0 1.0; operational exports have been validated privately. Operational table metadata has been inspected and a [table deployment script](schema/create-ops-tables.sql) is available. Local ZIP creation does not authorize redistribution of new or unreviewed assets.
+The first versions of all three datasets are released. The owner-approved public launch sequence and required repository protections are documented below. On 2026-11-20, the owner also approved CC0 1.0 for maintainer-owned repository code and documentation; the full terms are in [LICENSE](LICENSE). Five original event files are released unchanged as NDJSON under the owner's separate synthetic-data/CC0 approval; processing rules and business definitions remain unverified. The first budget workbook is released under the owner's synthetic-data/CC0 approval, with its Excel-authoritative maintenance contract documented in the budget guide. Consumer Excel-to-SharePoint setup links to Microsoft documentation; no maintainer-run import test is planned. The owner has approved the eight operational tables as synthetic and redistributable under CC0 1.0; operational exports have been validated privately. Operational table metadata has been inspected and a [table deployment script](schema/create-ops-tables.sql) is available. Local ZIP creation does not authorize redistribution of new or unreviewed assets.
 
 ## Validation
 
@@ -64,9 +64,13 @@ pwsh -NoProfile -File ./scripts/test-operational-release.ps1 -SourceDirectory $e
 
 The export directory must already contain the actual eight CSVs and marker. Preparation refuses existing output directories. Tests use temporary header-derived and isolated parser fixtures, not substitute Northstar source snapshots; no cloud or GitHub operations are performed by the test script.
 
-## Before Public Release
+## Repository Protection
 
-**Required step: repository protection (pending).** Configure and verify these controls before the owner makes the repository public; this checklist does not apply them:
+**Required controls.** Configure and verify these controls at public launch and preserve them afterward; this checklist is not proof of live enforcement:
+
+On 2026-11-20, GitHub returned HTTP 403 for rulesets on the current private-repository plan. The owner then explicitly approved the free public-repository route: complete the content/privacy review and commit the prepared ownership files while private, make the repository public, and immediately enforce and verify protection on `main`. This sequence has a brief transition gap before protection is active; it does not claim private-plan enforcement was available. A failed protection operation must be reported and resolved, not treated as a completed launch.
+
+CODEOWNERS provides global coverage for the four verified existing repository admins, including workflows, scripts, and the ownership file itself. Any author has other eligible owners who could provide independent review. Existing admin permissions were checked, not reduced; collaborator/team/app access changes require owner approval.
 
 1. Protect `main` with an enforced GitHub ruleset requiring pull requests and code-owner approval. Block force pushes and branch deletion, limit bypass permissions, and confirm the repository plan supports enforcement.
 2. Add CODEOWNERS coverage for workflows, publishing/validation scripts, and the ownership file itself. Assign authorized maintainers and verify a valid approval path for maintainer-authored changes; authors cannot approve their own pull requests.
