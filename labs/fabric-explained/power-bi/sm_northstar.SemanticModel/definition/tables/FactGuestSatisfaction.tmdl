@@ -1,0 +1,328 @@
+/// Guest satisfaction survey responses. Use this table to analyze overall satisfaction, service, cleanliness, value, and recommendation behavior.
+table FactGuestSatisfaction
+	lineageTag: 8e406884-f108-4d0a-9927-cf3724a7761b
+	sourceLineageTag: [dw].[FactGuestSatisfaction]
+
+	/// Total number of guest satisfaction survey responses in the current filter context.
+	measure 'Survey Responses' = ```
+			
+			    COUNTROWS ( 'FactGuestSatisfaction' )
+			```
+		formatString: #,##0
+		displayFolder: Satisfaction
+		lineageTag: c04b253c-42c2-4b0a-91b6-ad1d3a72fb24
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Average overall satisfaction rating reported by customers who completed a satisfaction survey in the current filter context.
+	measure 'Average Satisfaction Score' = ```
+			
+			    AVERAGE ( 'FactGuestSatisfaction'[SatisfactionScore] )
+			```
+		formatString: 0.0
+		displayFolder: Satisfaction
+		lineageTag: 012f2a46-6028-4cd9-a692-ecda85eb8023
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Average service rating reported by customers who completed a satisfaction survey in the current filter context.
+	measure 'Average Service Score' = ```
+			
+			    AVERAGE ( 'FactGuestSatisfaction'[ServiceScore] )
+			```
+		formatString: 0.0
+		displayFolder: Satisfaction
+		lineageTag: fe1a14e1-6d30-4719-8010-2f214ced38b5
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Average cleanliness rating reported by customers who completed a satisfaction survey in the current filter context.
+	measure 'Average Cleanliness Score' = ```
+			
+			    AVERAGE ( 'FactGuestSatisfaction'[CleanlinessScore] )
+			```
+		formatString: 0.0
+		displayFolder: Satisfaction
+		lineageTag: 4493a7d9-cc22-4abd-8109-b034e7121f04
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Average value rating reported by customers who completed a satisfaction survey in the current filter context.
+	measure 'Average Value Score' = ```
+			
+			    AVERAGE ( 'FactGuestSatisfaction'[ValueScore] )
+			```
+		formatString: 0.0
+		displayFolder: Satisfaction
+		lineageTag: c5d213bf-e1b5-4f46-9626-95471d2217ec
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Total number of survey respondents who indicated they would recommend the NorthStar property in the current filter context.
+	measure 'Would Recommend' = ```
+			
+			    CALCULATE (
+			        [Survey Responses],
+			        'FactGuestSatisfaction'[WouldRecommend] = TRUE ()
+			    )
+			```
+		formatString: #,##0
+		displayFolder: Satisfaction
+		lineageTag: cab292b8-6891-4a7e-9036-7d69c7ae4d80
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Percentage of survey respondents who indicated they would recommend the NorthStar property in the current filter context.
+	measure 'Recommendation Rate' = ```
+			
+			    DIVIDE (
+			        [Would Recommend],
+			        [Survey Responses]
+			    )
+			```
+		formatString: 0.0%
+		displayFolder: Satisfaction
+		lineageTag: fbab8bbc-d0b7-4ac3-948b-1a123a152110
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Total survey responses analyzed by guest stay date instead of survey submission date.
+	measure 'Survey Responses by Stay Date' =
+			CALCULATE (
+			    [Survey Responses],
+			    CROSSFILTER ( 'FactGuestSatisfaction'[SurveyDateKey], 'DimDate'[DateKey], NONE ),
+			    USERELATIONSHIP ( 'FactGuestSatisfaction'[StayDateKey], 'DimDate'[DateKey] )
+			)
+		formatString: #,##0
+		displayFolder: Satisfaction
+		lineageTag: c37832d6-644f-4d4f-891f-6adb0e4aea17
+
+	/// Average 1-5 satisfaction score analyzed by guest stay date instead of survey submission date.
+	measure 'Average Satisfaction Score by Stay Date' =
+			CALCULATE (
+			    [Average Satisfaction Score],
+			    CROSSFILTER ( 'FactGuestSatisfaction'[SurveyDateKey], 'DimDate'[DateKey], NONE ),
+			    USERELATIONSHIP ( 'FactGuestSatisfaction'[StayDateKey], 'DimDate'[DateKey] )
+			)
+		formatString: 0.0
+		displayFolder: Satisfaction
+		lineageTag: e29a8f31-cf2e-4bdd-a4fa-494832b020bb
+
+	/// Difference between the current property satisfaction score and the portfolio average in the current filter context.
+	measure 'Satisfaction vs Portfolio' = ```
+					VAR CurrentScore =
+						[Average Satisfaction Score]
+					VAR PortfolioScore =
+						CALCULATE (
+							[Average Satisfaction Score],
+							REMOVEFILTERS ( 'DimProperty' )
+						)
+					RETURN
+						CurrentScore - PortfolioScore
+					
+			```
+		formatString: 0.00
+		displayFolder: Satisfaction
+		lineageTag: 98b339ae-dfa5-484b-9120-a1ffd9a02882
+
+	column SurveyID
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: 7d1d7c4e-93eb-489a-8db0-eb173e8f045c
+		sourceLineageTag: SurveyID
+		summarizeBy: count
+		sourceColumn: SurveyID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Warehouse date key for the surveyed stay. Inactive DimDate role; use stay-date-specific satisfaction measures.
+	column StayDateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: d573646b-53e6-4f69-ae5a-b03fb867aae6
+		sourceLineageTag: StayDateKey
+		summarizeBy: count
+		sourceColumn: StayDateKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Warehouse date key for when the survey was submitted. Active DimDate role used for satisfaction trends.
+	column SurveyDateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: b6b8c79f-0db6-47b8-a077-92a790ab9c8a
+		sourceLineageTag: SurveyDateKey
+		summarizeBy: none
+		sourceColumn: SurveyDateKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: cb42e390-99ae-4993-8eb8-e061838ac0e8
+		sourceLineageTag: PropertyKey
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column GuestKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: 98b88bee-5f04-41ed-9bb8-f4e785093731
+		sourceLineageTag: GuestKey
+		summarizeBy: none
+		sourceColumn: GuestKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ChannelKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: 46bbc04b-ee4a-495a-8abd-9483f82a0865
+		sourceLineageTag: ChannelKey
+		summarizeBy: none
+		sourceColumn: ChannelKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SatisfactionScore
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(5, 2)
+		lineageTag: 367d5630-b9b2-4fd0-9553-d76e2eb7286f
+		sourceLineageTag: SatisfactionScore
+		summarizeBy: sum
+		sourceColumn: SatisfactionScore
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column ServiceScore
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(5, 2)
+		lineageTag: 0ade7d38-10f6-4f7a-8494-7739d1ab0141
+		sourceLineageTag: ServiceScore
+		summarizeBy: sum
+		sourceColumn: ServiceScore
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column CleanlinessScore
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(5, 2)
+		lineageTag: 47f2b3d2-7eaf-48ab-b580-7b246e8e4424
+		sourceLineageTag: CleanlinessScore
+		summarizeBy: sum
+		sourceColumn: CleanlinessScore
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column ValueScore
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(5, 2)
+		lineageTag: 505ecc2a-e1cf-4f26-87aa-0ca933a26f6e
+		sourceLineageTag: ValueScore
+		summarizeBy: sum
+		sourceColumn: ValueScore
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column WouldRecommend
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		sourceProviderType: bit
+		lineageTag: ea4e6459-0868-47f8-bb3a-5f85de672b08
+		sourceLineageTag: WouldRecommend
+		summarizeBy: none
+		sourceColumn: WouldRecommend
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SourceUpdatedAt
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: ce8aa31e-ae49-40ce-bc35-509e2a9cd15c
+		sourceLineageTag: SourceUpdatedAt
+		summarizeBy: none
+		sourceColumn: SourceUpdatedAt
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactGuestSatisfaction = entity
+		mode: directLake
+		source
+			entityName: FactGuestSatisfaction
+			schemaName: dw
+			expressionSource: DatabaseQuery
+
+	changedProperty = Description
+

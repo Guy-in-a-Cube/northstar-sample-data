@@ -1,0 +1,17 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "3b2c4f6994dcafe61093",
+  "position": {
+    "x": 1569.2128279883384,
+    "y": 136.20991253644317,
+    "z": 0,
+    "height": 943.73177842565588,
+    "width": 303.73177842565588,
+    "tabOrder": 16005
+  },
+  "visualGroup": {
+    "displayName": "Booking Risk View",
+    "groupMode": "ScaleMode"
+  },
+  "isHidden": true
+}

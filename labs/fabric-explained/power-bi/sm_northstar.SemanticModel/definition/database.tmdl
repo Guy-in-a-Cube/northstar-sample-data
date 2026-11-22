@@ -1,0 +1,5 @@
+database sm_northstar
+	compatibilityLevel: 1705
+	compatibilityMode: powerBI
+	language: 1033
+

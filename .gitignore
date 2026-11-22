@@ -13,3 +13,6 @@
 .vscode/
 Thumbs.db
 .DS_Store
+/labs/fabric-explained/power-bi/**/.pbi/
+/labs/fabric-explained/power-bi/**/*.pbix
+/labs/fabric-explained/power-bi/**/*.abf

@@ -1,0 +1,330 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "typeProperties": {
+          "ifFalseActivities": [],
+          "ifTrueActivities": [
+            {
+              "name": "Create Load Run",
+              "type": "SqlServerStoredProcedure",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "storedProcedureName": "[ctl].[usp_start_load_run]",
+                "storedProcedureParameters": {
+                  "LoadRunID": {
+                    "value": {
+                      "value": "@pipeline().parameters.LoadRunID",
+                      "type": "Expression"
+                    },
+                    "type": "String"
+                  },
+                  "PipelineName": {
+                    "value": {
+                      "value": "@pipeline().PipelineName",
+                      "type": "Expression"
+                    },
+                    "type": "String"
+                  }
+                }
+              },
+              "linkedService": {
+                "name": "wh_northstar",
+                "properties": {
+                  "annotations": [],
+                  "type": "DataWarehouse",
+                  "typeProperties": {
+                    "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+                    "artifactId": "00000000-0000-0000-0000-000000000002",
+                    "workspaceId": "00000000-0000-0000-0000-000000000001"
+                  }
+                }
+              }
+            }
+          ],
+          "expression": {
+            "type": "Expression",
+            "value": "@pipeline().parameters.StartLoadRun"
+          }
+        },
+        "dependsOn": [],
+        "type": "IfCondition",
+        "name": "Start Load Run"
+      },
+      {
+        "name": "Load FactBooking",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Start Load Run",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[dw].[usp_load_fact_booking]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@pipeline().parameters.LoadRunID",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "name": "Load FactGustSatisfaction",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Start Load Run",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[dw].[usp_load_fact_guest_satisfaction]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@pipeline().parameters.LoadRunID",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "name": "Load FactPropertyBudget",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Start Load Run",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[dw].[usp_load_fact_property_budget]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@pipeline().parameters.LoadRunID",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "name": "Load FactPropertyInventory",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Start Load Run",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[dw].[usp_load_fact_property_inventory]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@pipeline().parameters.LoadRunID",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "name": "Load FactStayNight",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Load FactBooking",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[dw].[usp_load_fact_stay_night]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@pipeline().parameters.LoadRunID",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "name": "Load FactPropertyEvent",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Start Load Run",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[dw].[usp_load_fact_property_event]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@pipeline().parameters.LoadRunID",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "LoadRunID": {
+        "type": "string"
+      },
+      "StartLoadRun": {
+        "defaultValue": true,
+        "type": "bool"
+      }
+    }
+  }
+}

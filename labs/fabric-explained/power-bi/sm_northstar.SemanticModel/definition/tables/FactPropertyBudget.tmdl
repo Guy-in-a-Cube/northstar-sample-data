@@ -1,0 +1,174 @@
+/// Monthly budget targets by NorthStar property. Use this table to compare actual revenue and occupancy performance against budget.
+table FactPropertyBudget
+	lineageTag: 36ef51db-bbf9-4128-ab40-c63c1ce97a1d
+	sourceLineageTag: [dw].[FactPropertyBudget]
+
+	/// Total budgeted revenue for NorthStar properties in the current filter context.
+	measure 'Budget Revenue' = ```
+			
+			    SUM ( 'FactPropertyBudget'[BudgetRevenue] )
+			```
+		formatString: $#,##0.00
+		displayFolder: Budget
+		lineageTag: 3e63364c-51cb-4cc2-9e12-d885debfb335
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Average budgeted occupancy percentage for NorthStar properties in the current filter context.
+	measure 'Budget Occupancy %' = ```
+			
+			    AVERAGE ( 'FactPropertyBudget'[BudgetOccupancyPct] )
+			```
+		formatString: 0.0%
+		displayFolder: Budget
+		lineageTag: 70a70d6b-0e46-435e-8552-58d52d73c84a
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Difference between actual realized revenue and budgeted revenue in the current filter context. Positive values indicate revenue is above budget; negative values indicate it is below budget.
+	measure 'Revenue Variance' = ```
+			
+			    [Total Revenue]
+			    - [Budget Revenue]
+			```
+		formatString: $#,##0.00
+		displayFolder: Budget
+		lineageTag: 3c630503-a5e3-485a-ad56-73f88669e5dd
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Revenue variance expressed as a percentage of budgeted revenue in the current filter context. Positive values indicate performance above budget; negative values indicate performance below budget.
+	measure 'Revenue Variance %' = ```
+			
+			    DIVIDE (
+			        [Revenue Variance],
+			        [Budget Revenue]
+			    )
+			```
+		formatString: 0.0%
+		displayFolder: Budget
+		lineageTag: 0d5994fe-0551-425f-8238-f305bd7876e5
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	/// Actual occupancy percentage minus budgeted occupancy percentage. Positive values mean occupancy is above budget; negative values mean it is below budget.
+	measure 'Occupancy Variance' = ```
+			
+			    [Occupancy %]
+			    - [Budget Occupancy %]
+			```
+		formatString: 0.0%
+		displayFolder: Budget
+		lineageTag: 1021cbf5-8e1e-4b17-8455-52fc3123fc2b
+
+		changedProperty = FormatString
+
+		changedProperty = Description
+
+	column PropertyBudgetKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: d35a632c-b20d-469a-a957-03e3c2b5d0f9
+		sourceLineageTag: PropertyBudgetKey
+		summarizeBy: count
+		sourceColumn: PropertyBudgetKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: ffdec860-98d3-44a2-a190-bfdf432ce076
+		sourceLineageTag: PropertyKey
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Warehouse date key for the monthly budget period. Active DimDate role used for revenue and occupancy budget comparisons.
+	column BudgetMonthDateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: cc0e0d44-1b25-4b4b-94e7-c2ae4d60b8d0
+		sourceLineageTag: BudgetMonthDateKey
+		summarizeBy: none
+		sourceColumn: BudgetMonthDateKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column BudgetRevenue
+		dataType: double
+		isHidden
+		sourceProviderType: decimal(18, 2)
+		lineageTag: cb721bda-5a5c-44b5-b748-ca256cc4c561
+		sourceLineageTag: BudgetRevenue
+		summarizeBy: sum
+		sourceColumn: BudgetRevenue
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column BudgetOccupancyPct
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(9, 4)
+		lineageTag: db79ec40-99e6-484e-bf3b-6c22ba3b7d0d
+		sourceLineageTag: BudgetOccupancyPct
+		summarizeBy: sum
+		sourceColumn: BudgetOccupancyPct
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column SourceUpdatedAt
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 384d535c-28a2-4eff-86ff-494766d85234
+		sourceLineageTag: SourceUpdatedAt
+		summarizeBy: none
+		sourceColumn: SourceUpdatedAt
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactPropertyBudget = entity
+		mode: directLake
+		source
+			entityName: FactPropertyBudget
+			schemaName: dw
+			expressionSource: DatabaseQuery
+
+	changedProperty = Description
+

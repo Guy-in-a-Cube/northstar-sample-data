@@ -1,0 +1,11 @@
+expression DatabaseQuery =
+		let
+		    database = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000002")
+		in
+		    database
+	lineageTag: 8eaafca1-ad3d-499d-ab80-1faa950db11f
+
+	annotation PBI_IncludeFutureArtifacts = False
+
+	annotation PBI_RemovedChildren = [{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[ctl].[LoadRun]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[ctl].[LoadRunDetail]"}},"objectType":"Table"}]
+
