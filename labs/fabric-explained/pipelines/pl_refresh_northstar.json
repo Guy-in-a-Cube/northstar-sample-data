@@ -1,0 +1,312 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "name": "Load Operational Data",
+        "type": "InvokeCopyJob",
+        "dependsOn": [
+          {
+            "activity": "Start Load Run",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "copyJobId": "00000000-0000-0000-0000-000000000006",
+          "workspaceId": "00000000-0000-0000-0000-000000000001",
+          "operationType": "RunCopyJob"
+        },
+        "externalReferences": {
+          "connection": "00000000-0000-0000-0000-000000000007"
+        }
+      },
+      {
+        "name": "Process Property Events",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Load Operational Data",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "00000000-0000-0000-0000-000000000003",
+          "workspaceId": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      {
+        "name": "Set LoadRunID Variable",
+        "type": "SetVariable",
+        "dependsOn": [],
+        "policy": {
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "variableName": "LoadRunID",
+          "value": {
+            "value": "@guid()",
+            "type": "Expression"
+          }
+        }
+      },
+      {
+        "name": "Load Dimensions",
+        "type": "InvokePipeline",
+        "dependsOn": [
+          {
+            "activity": "Process Property Events",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "waitOnCompletion": true,
+          "operationType": "InvokeFabricPipeline",
+          "pipelineId": "00000000-0000-0000-0000-000000000004",
+          "workspaceId": "00000000-0000-0000-0000-000000000001",
+          "parameters": {
+            "LoadRunID": {
+              "value": "@variables('LoadRunID')",
+              "type": "Expression"
+            },
+            "StartLoadRun": {
+              "type": "Expression",
+              "value": "@bool(0)"
+            }
+          }
+        },
+        "externalReferences": {
+          "connection": "00000000-0000-0000-0000-000000000008"
+        }
+      },
+      {
+        "name": "Load Facts",
+        "type": "InvokePipeline",
+        "dependsOn": [
+          {
+            "activity": "Load Dimensions",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "waitOnCompletion": true,
+          "operationType": "InvokeFabricPipeline",
+          "pipelineId": "00000000-0000-0000-0000-000000000005",
+          "workspaceId": "00000000-0000-0000-0000-000000000001",
+          "parameters": {
+            "LoadRunID": {
+              "value": "@variables('LoadRunID')",
+              "type": "Expression"
+            },
+            "StartLoadRun": {
+              "type": "Expression",
+              "value": "@bool(0)"
+            }
+          }
+        },
+        "externalReferences": {
+          "connection": "00000000-0000-0000-0000-000000000008"
+        }
+      },
+      {
+        "name": "Start Load Run",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Set LoadRunID Variable",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[ctl].[usp_start_load_run]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@variables('LoadRunID')",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "PipelineName": {
+              "value": {
+                "value": "@pipeline().PipelineName",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "name": "Complete Load Run",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Load Facts",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[ctl].[usp_complete_load_run]",
+          "storedProcedureParameters": {
+            "LoadRunID": {
+              "value": {
+                "value": "@variables('LoadRunID')",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "name": "Fail Load Run",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Complete Load Run",
+            "dependencyConditions": [
+              "Failed",
+              "Skipped"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "[ctl].[usp_fail_load_run]",
+          "storedProcedureParameters": {
+            "ErrorMessage": {
+              "value": "NorthStar refresh pipeline failed. See Fabric pipeline run history for activity-level error details.",
+              "type": "String"
+            },
+            "LoadRunID": {
+              "value": {
+                "value": "@variables('LoadRunID')",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "wh_northstar",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "__WAREHOUSE_SQL_ENDPOINT__",
+              "artifactId": "00000000-0000-0000-0000-000000000002",
+              "workspaceId": "00000000-0000-0000-0000-000000000001"
+            }
+          }
+        }
+      },
+      {
+        "typeProperties": {
+          "message": "NorthStar refresh failed. Check ctl.LoadRun and Fabric activity run history.",
+          "errorCode": "NorthstarRefreshFailed"
+        },
+        "dependsOn": [
+          {
+            "activity": "Fail Load Run",
+            "dependencyConditions": [
+              "Succeeded",
+              "Failed"
+            ]
+          }
+        ],
+        "type": "Fail",
+        "name": "Fail Refresh"
+      }
+    ],
+    "variables": {
+      "LoadRunID": {
+        "type": "String",
+        "defaultValue": "guid()"
+      }
+    }
+  }
+}

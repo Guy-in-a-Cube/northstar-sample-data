@@ -1,0 +1,215 @@
+/// Operational events recorded at NorthStar properties, including maintenance, amenity closures, and rooms entering or returning from out-of-service status.
+table FactPropertyEvent
+	lineageTag: 6319bbbb-8f10-4a71-8ce0-6aa41816f078
+	sourceLineageTag: [dw].[FactPropertyEvent]
+
+	/// Total number of operational events recorded at NorthStar properties in the current filter context.
+	measure 'Property Events' = COUNTROWS ( 'FactPropertyEvent' )
+		formatString: #,##0
+		displayFolder: Operations
+		lineageTag: e17f4205-4b95-4ae8-95e0-e4065c6361a3
+
+	/// Distinct number of properties with at least one recorded operational event in the current filter context.
+	measure 'Affected Properties' = DISTINCTCOUNT ( 'FactPropertyEvent'[PropertyKey] )
+		formatString: #,##0
+		displayFolder: Operations
+		lineageTag: 2e3fe4aa-2165-491d-9757-ee7462dd5351
+
+	/// Total number of events recording a room entering out-of-service status in the current filter context.
+	measure 'Out-of-Service Events' =
+			CALCULATE (
+			    [Property Events],
+			    'FactPropertyEvent'[EventType] = "ROOM_OUT_OF_SERVICE"
+			)
+		formatString: #,##0
+		displayFolder: Operations
+		lineageTag: 4cd54dd0-5a29-4cf1-b337-24018c26b402
+
+	/// Total number of events recording a room returning to service in the current filter context.
+	measure 'Rooms Returned to Service Events' =
+			CALCULATE (
+			    [Property Events],
+			    'FactPropertyEvent'[EventType] = "ROOM_RETURNED_TO_SERVICE"
+			)
+		formatString: #,##0
+		displayFolder: Operations
+		lineageTag: 13d9d6dc-d038-4a3a-8a9d-393ac6bbdc46
+
+	/// Total number of maintenance events recorded at NorthStar properties in the current filter context.
+	measure 'Maintenance Events' =
+			CALCULATE (
+			    [Property Events],
+			    'FactPropertyEvent'[EventType] = "MAINTENANCE"
+			)
+		formatString: #,##0
+		displayFolder: Operations
+		lineageTag: f87ccbc0-78ae-4718-a216-3e01e9dcd141
+
+	/// Total number of amenity closure events recorded at NorthStar properties in the current filter context.
+	measure 'Amenity Closure Events' =
+			CALCULATE (
+			    [Property Events],
+			    'FactPropertyEvent'[EventType] = "AMENITY_CLOSED"
+			)
+		formatString: #,##0
+		displayFolder: Operations
+		lineageTag: e49d36a4-0f61-4953-91b4-af2aab308868
+
+	/// Total number of operational events classified as high severity in the current filter context.
+	measure 'High Severity Events' =
+			CALCULATE (
+			    [Property Events],
+			    'FactPropertyEvent'[Severity] = "HIGH"
+			)
+		formatString: #,##0
+		displayFolder: Operations
+		lineageTag: 2490ceab-b712-43fb-82d9-cb7627e8c6a7
+
+	column PropertyEventKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		isAvailableInMdx: false
+		sourceProviderType: bigint
+		lineageTag: 5b805acc-fb4b-4f02-aa0f-7acc944cd093
+		sourceLineageTag: PropertyEventKey
+		summarizeBy: none
+		sourceColumn: PropertyEventKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column EventID
+		dataType: string
+		isHidden
+		isAvailableInMdx: false
+		sourceProviderType: varchar(50)
+		lineageTag: 25483c15-6435-45e8-8c59-c0eb41558164
+		sourceLineageTag: EventID
+		summarizeBy: none
+		sourceColumn: EventID
+
+		annotation SummarizationSetBy = Automatic
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		isAvailableInMdx: false
+		sourceProviderType: bigint
+		lineageTag: add78d27-3a07-4e7f-9e2b-4187d15040b2
+		sourceLineageTag: PropertyKey
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Warehouse date key for the operational event. Active DimDate role used for event trends.
+	column EventDateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		isAvailableInMdx: false
+		sourceProviderType: int
+		lineageTag: 17574fa0-7e95-4168-8684-088414927f4b
+		sourceLineageTag: EventDateKey
+		summarizeBy: none
+		sourceColumn: EventDateKey
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Date and time when the property operational event occurred. Use DimDate for daily and period-based trends.
+	column EventTimestamp
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: a4dc176e-6b2b-4f34-80ec-5a8f15b7d987
+		sourceLineageTag: EventTimestamp
+		summarizeBy: none
+		sourceColumn: EventTimestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Operational event category, such as ROOM_OUT_OF_SERVICE, ROOM_RETURNED_TO_SERVICE, AMENITY_CLOSED, or MAINTENANCE.
+	column EventType
+		dataType: string
+		sourceProviderType: varchar(100)
+		lineageTag: 9b032a67-033e-4c32-a689-fa2b213c6686
+		sourceLineageTag: EventType
+		summarizeBy: none
+		sourceColumn: EventType
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Room identifier affected by the operational event. Treat as a label and never aggregate; may be blank for property-wide events.
+	column RoomNumber
+		dataType: double
+		sourceProviderType: float
+		lineageTag: 268c5abb-7855-4985-b378-e817c49e0714
+		sourceLineageTag: RoomNumber
+		summarizeBy: none
+		sourceColumn: RoomNumber
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Operational impact level assigned to the event: LOW, MEDIUM, or HIGH.
+	column Severity
+		dataType: string
+		sourceProviderType: varchar(50)
+		lineageTag: 7f45eab6-f25d-4bea-8f4e-e06cd6e4802e
+		sourceLineageTag: Severity
+		summarizeBy: none
+		sourceColumn: Severity
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Free-text operational details recorded for the property event. Use to explain individual events, not as a grouping category.
+	column Description
+		dataType: string
+		sourceProviderType: varchar(500)
+		lineageTag: 53435255-f5ba-4e89-9b4b-b12f71ecb050
+		sourceLineageTag: Description
+		summarizeBy: none
+		sourceColumn: Description
+
+		annotation SummarizationSetBy = Automatic
+
+	/// System that supplied the operational event record. Use for data lineage or source-specific analysis.
+	column SourceSystem
+		dataType: string
+		sourceProviderType: varchar(100)
+		lineageTag: 65061f1b-6edb-4eee-aec3-08bd37112758
+		sourceLineageTag: SourceSystem
+		summarizeBy: none
+		sourceColumn: SourceSystem
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Event Shift' =
+			
+			VAR EventHour =
+			    HOUR ( 'FactPropertyEvent'[EventTimestamp] )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        EventHour < 6,  "Overnight",
+			        EventHour < 12, "Morning",
+			        EventHour < 18, "Afternoon",
+			        "Evening"
+			    )
+		lineageTag: a3a2792d-5f71-40e0-9c8d-17876da581e6
+		summarizeBy: none
+		expressionContext: userContext
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactPropertyEvent = entity
+		mode: directLake
+		source
+			entityName: FactPropertyEvent
+			schemaName: dw
+			expressionSource: DatabaseQuery
+
