@@ -1,6 +1,6 @@
 # Fabric Explained Pipelines
 
-These are sanitized Fabric DataPipeline definitions, not native ZIP templates for the pipeline template gallery. Each JSON file is uploaded as the `pipeline-content.json` definition part through the Fabric REST API. Configure the bindings before uploading; the placeholder-bound files are not runnable.
+These are sanitized Fabric DataPipeline definitions. For this course, create pipelines in Fabric and copy/paste the configured JSON using **View > Edit JSON** as described below. Configure the bindings first; the placeholder-bound files are not runnable. These JSON files are not native ZIP templates for the pipeline template gallery.
 
 | File | Purpose |
 | --- | --- |
@@ -12,7 +12,7 @@ The refresh is standalone with respect to the original external Azure Data Facto
 
 ## Prerequisites
 
-- A workspace on a supported Fabric capacity, with Contributor access and an identity authorized for `DataPipeline.ReadWrite.All` or `Item.ReadWrite.All`.
+- A workspace on a supported Fabric capacity, with Contributor access. The copy/paste setup does not require a Fabric API token or API-specific scopes.
 - The `wh_northstar` objects from the [Warehouse scripts](../warehouse/README.md), with permission to execute the load and logging procedures.
 - A schema-enabled `lh_northstar` with the operational tables in `landing`, using the names and structures expected by the Warehouse procedures.
 - The [property-event notebook](../notebooks/README.md), attached to the correct default Lakehouse and supplied with its input files. It writes `processed.PropertyEvent` and `quarantine.PropertyEvent`.
@@ -40,9 +40,31 @@ Configure local working copies rather than committing your environment's identif
 
 Keep the expected source item names (`wh_northstar`, `lh_northstar`, and `PropertyBudget`) unless you also update the SQL that references them. The UUID-shaped markers above are deliberately non-live placeholders, not usable defaults.
 
-Configure the Copy Job's SQL-source connection and destination Lakehouse within the job itself. The placeholder ending in `0007` is the Fabric connection used by `Load Operational Data` to invoke that job, not its SQL-source connection. Creating the job item or uploading a pipeline does not seed the source database or configure those data connections for you.
+Configure the Copy Job's SQL-source connection and destination Lakehouse within the job itself. The placeholder ending in `0007` is the Fabric connection used by `Load Operational Data` to invoke that job, not its SQL-source connection. Creating the job item or saving a pipeline does not seed the source database or configure those data connections for you.
 
-## Upload
+## Create Pipelines With Copy/Paste JSON
+
+This is the course setup path. Creating and saving a pipeline does not run it or create a schedule. Work with newly created lab pipelines; do not replace an existing working pipeline's definition.
+
+1. In the target workspace, create a pipeline named `pl_load_northstar_dimension`.
+2. In a local working copy of its JSON file, replace every Warehouse endpoint, workspace ID, and Warehouse item ID placeholder using the [binding table](#bindings). Include the stored-procedure activity nested inside `Start Load Run`.
+3. Open **View > Edit JSON** in the pipeline editor. Copy the configured file's content **omitting the outermost opening `{` and closing `}`**. Paste it inside the editor's enclosing `{}` in place of its existing inner content, retaining those editor braces. Keep all nested braces and the `properties` content. This preserves the dimension copy/paste procedure confirmed for this course; do not remove the wrapper from the repository file itself.
+4. Apply the editor changes and save the pipeline. Inspect its activities and Warehouse bindings, then record its item ID from the pipeline URL for use in the refresh definition.
+5. Repeat steps 1-4 for `pl_load_northstar_fact`, using its own JSON file and display name. Record its item ID too. Confirm the conditional initialization and the dependency from `FactBooking` to `FactStayNight` remain intact.
+6. Create `pl_refresh_northstar`. Configure a local copy of its JSON using all applicable entries in the binding table, including the two saved child-pipeline IDs, the notebook ID, the Copy Job ID, and the invocation connection IDs. Repeat the editor paste and save steps.
+7. Before running the refresh, inspect every activity, connection, notebook attachment, and child-pipeline selection. Confirm that no placeholders remain and that all targets belong to the intended lab workspace. Creating these pipelines supplies no schedules, credentials, or permissions, and requires no Variable Library.
+
+The dimension paste procedure was confirmed by the course author on November 23, 2026. The same procedure is the intended setup for fact and refresh, but their editor paste/save behavior has not yet been confirmed. Treat those two UI checks as pending, not as evidence of successful end-to-end execution. See [Validation](#validation) for the separate REST import checks.
+
+## Other Import Options
+
+### Native ZIP Templates
+
+Fabric also supports [exporting and importing pipeline ZIP templates](https://learn.microsoft.com/en-us/fabric/data-factory/templates). This repository does not provide those ZIP packages. Uploading these raw JSON files, or simply zipping them, is not the documented native template import process. ZIP export/import and dependency rebinding have not been validated for these samples.
+
+### Optional REST API Upload
+
+The REST route below is an advanced alternative, not a prerequisite for the copy/paste setup. It requires a Fabric API token and an identity authorized for `DataPipeline.ReadWrite.All` or `Item.ReadWrite.All`, in addition to the workspace and runtime permissions above. Use the complete configured JSON file, including its outermost braces; the editor paste selection is not the REST payload.
 
 The tested route is to create empty pipelines and then upload their configured definitions. Neither operation runs a pipeline or creates a schedule.
 
@@ -93,7 +115,7 @@ The tested route is to create empty pipelines and then upload their configured d
 
 6. Open the imported pipelines in Fabric and inspect every activity, connection, notebook attachment, and child-pipeline selection before running. No `.platform`, schedules, credentials, or permissions are supplied by these files. Authentication must use a token for the Fabric API; keep it out of files and source control.
 
-See the [DataPipeline definition reference](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/datapipeline-definition) for the payload structure. Uploading the raw JSON to the template gallery was not tested and is not the import process described here.
+See the [DataPipeline definition reference](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/datapipeline-definition) for the REST payload structure.
 
 ## Running And Logging
 
@@ -143,5 +165,7 @@ The reference refresh coordinates operational ingestion, property-event processi
 Validation on November 21, 2026 covered JSON parsing, source-preservation checks, placeholder-only public bindings, dependency references, shared-ID/header settings, booking-before-stay ordering, and an offline simulation of the success route and eight failure scenarios.
 
 All three configured definitions were uploaded into temporary, unscheduled Fabric pipelines and retrieved again. Each saved content definition matched its configured upload exactly. Direct placeholder-bound uploads were rejected; configure the bindings before uploading. The temporary pipelines were deleted afterward.
+
+On November 23, 2026, the course author confirmed that copying/pasting the dimension JSON while omitting the file's outermost `{}` worked in **View > Edit JSON**. The fact and refresh editor imports, native ZIP imports, and Variable Library bindings have not been validated. The copy/paste documentation update leaves all three JSON definitions unchanged.
 
 No pipeline was executed during validation. Import acceptance is not proof that connections, SQL loads, Copy Job ingestion, notebook invocation, or end-to-end logging will succeed in a new environment. The live lab pipelines were not modified.
