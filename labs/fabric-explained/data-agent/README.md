@@ -15,7 +15,7 @@ The reference agent uses one Power BI semantic model, `sm_northstar`, as its aut
 
 - A paid Fabric F2 or higher capacity, or Power BI Premium P1 or higher with Fabric enabled. Confirm the required AI tenant settings, including cross-geo processing and storage, with your administrator.
 - Permission to create a data-agent item in your lab workspace.
-- A working `sm_northstar` semantic model in Fabric, backed by your loaded lab Warehouse. The local [Power BI checkpoint](../power-bi/README.md) is a starting artifact, not a service data source; prepare and validate the model in Fabric before adding it to the agent.
+- A working semantic model in Fabric, backed by your loaded lab Warehouse. Run the model-creation notebook in the [Power BI guide](../power-bi/README.md) and confirm its refresh and query checks pass before adding that model to the agent. The course name is `sm_northstar`; if you retained the notebook's `sm_northstar_test` default or chose another name, select that actual model throughout this guide.
 - Read permission on the semantic model. For semantic-model interactions through a data agent, Build permission and membership in the model's workspace are not required. Model authoring has separate permission requirements.
 
 The sample data is synthetic. Review the selected guest-name and email fields before adapting this configuration to real data. Data access runs under the caller's permissions; agent instructions are not a substitute for access controls or model security.
@@ -55,7 +55,7 @@ The captured definition selects 11 tables, 36 columns, and 57 measures. The fiel
 | `FactPropertyBudget` | `Budget Revenue`, `Budget Occupancy %`, `Revenue Variance`, `Revenue Variance %`, `Occupancy Variance` |
 | `FactPropertyEvent` | `EventTimestamp`, `EventType`, `RoomNumber`, `Severity`, `Description`, `SourceSystem`, `Property Events`, `Affected Properties`, `Out-of-Service Events`, `Rooms Returned to Service Events`, `Maintenance Events`, `Amenity Closure Events`, `High Severity Events` |
 
-The four measures on `DimProperty` and `Satisfaction vs Portfolio` are outside the captured agent selection. Hidden technical keys and raw fact amounts are also outside this scope. If you change the model or its visibility settings, review the agent's selection again; do not assume the original field list updates automatically.
+`DimProperty[Property Information]` and `Satisfaction vs Portfolio` are outside the captured agent selection. The three property-image measures from the reference model are not included in the supplied notebook model. Hidden technical keys and raw fact amounts are also outside this scope. If you change the model or its visibility settings, review the agent's selection again; do not assume the original field list updates automatically.
 
 ## Review Answers
 
