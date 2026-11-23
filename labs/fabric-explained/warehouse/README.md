@@ -33,7 +33,11 @@ The procedure definitions retain the lab's existing three-part source names. Pre
 | `lh_northstar.processed` | `PropertyEvent` |
 | `PropertyBudget.dbo` | `[Property Budget]` |
 
+Populate the eight `landing` tables using the [Copy Job ingestion guide](../guides/copy-job-ingestion.md). It maps your SQL source's `ops` tables, initially seeded from the released CSVs, into same-named Lakehouse tables. Finish the initial copy and confirm the tables are visible through the Lakehouse SQL analytics endpoint before relying on these source references. The Copy Job's row-ID upsert keys are not the Warehouse's surrogate keys or business-code joins.
+
 The existing operational CSVs, budget workbook, and raw event JSON are inputs to separate ingestion and processing steps. Running these Warehouse scripts alone does not create the source items or load those files.
+
+The existing loaders do not provide complete incremental-delete propagation. The ingestion guide documents that limitation; changing the Copy Job to incremental copying does not add Warehouse delete handling.
 
 ## Loading Data
 

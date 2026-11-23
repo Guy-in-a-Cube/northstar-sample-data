@@ -15,10 +15,16 @@ quarantined Delta tables.
   in `Files/property-events`. Upload the files themselves, not the ZIP. A shortcut
   to equivalent files also works; an Azure Blob Storage connection is not required.
 - A Delta table at `Tables/landing/Property`, with `property_code` as an integer
-  and `property_name` as text. Use the released operational `Property.csv` to load
-  this table; the [repository download guide](../../../README.md) links to the
-  operational data release. A CSV in Files is not a substitute for the Delta table.
+  and `property_name` as text. For the full lab, populate it through the
+  [Copy Job ingestion guide](../guides/copy-job-ingestion.md) and complete the
+  initial copy before executing the notebook. A CSV in Files is not a substitute
+  for the Delta table.
 - The `processed` and `quarantine` Lakehouse schemas.
+
+For a notebook-only check, manually loading the released operational `Property.csv`
+into that Delta table remains an alternative; the [repository download guide](../../../README.md)
+links to the release. This shortcut does not populate the other seven operational
+tables and is not a replacement for the full Copy Job workflow.
 
 The notebook uses the Fabric **Python** experience and **Python 3.12** kernel,
 not PySpark. Its pandas, DuckDB, and delta-rs libraries are provided by that runtime;
