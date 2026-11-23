@@ -8,7 +8,7 @@ These are sanitized Fabric DataPipeline definitions, not native ZIP templates fo
 | [pl_load_northstar_fact.json](pl_load_northstar_fact.json) | Conditionally start a load run, then load the six Warehouse facts. FactStayNight waits for FactBooking. |
 | [pl_refresh_northstar.json](pl_refresh_northstar.json) | Generate a shared LoadRunID, start the run, invoke operational ingestion, process property events, load dimensions and facts, and record completion or failure. |
 
-The refresh is standalone with respect to the original external Azure Data Factory pipeline. It still requires the Fabric Copy Job described below. It refreshes Warehouse data; it does not refresh a Power BI semantic model.
+The refresh is standalone with respect to the original external Azure Data Factory pipeline. It still requires the Fabric Copy Job configured using the [operational ingestion guide](../guides/copy-job-ingestion.md). It refreshes Warehouse data; it does not refresh a Power BI semantic model.
 
 ## Prerequisites
 
@@ -17,8 +17,8 @@ The refresh is standalone with respect to the original external Azure Data Facto
 - A schema-enabled `lh_northstar` with the operational tables in `landing`, using the names and structures expected by the Warehouse procedures.
 - The [property-event notebook](../notebooks/README.md), attached to the correct default Lakehouse and supplied with its input files. It writes `processed.PropertyEvent` and `quarantine.PropertyEvent`.
 - The `PropertyBudget` source exposing `dbo.[Property Budget]`, as required by the budget loader.
-- A separately configured Fabric Copy Job that populates the operational landing tables. Its definition is not included here.
-- Fabric connections and permissions for the Copy Job and child-pipeline invocation activities. A connection ID is not the same as a workspace or item ID.
+- A populated operational SQL source and a separately configured `cj_northstar_ops` Copy Job, following the [source setup and mappings](../guides/copy-job-ingestion.md). Complete its initial landing-table load before relying on the notebook or Warehouse sources. No importable Copy Job definition or CSV-to-SQL importer is included here.
+- Fabric connections and permissions for the Copy Job and child-pipeline invocation activities. The job's SQL-source connection is separate from the pipeline's Fabric invocation connection. A connection ID is not the same as a workspace or item ID.
 
 The procedures modify Warehouse data, and the notebook overwrites its two output tables. Inspect the linked scripts and source mappings before running these pipelines against existing data.
 
@@ -39,6 +39,8 @@ Configure local working copies rather than committing your environment's identif
 | `00000000-0000-0000-0000-000000000008` | Fabric connection ID for both `Load Dimensions` and `Load Facts`. |
 
 Keep the expected source item names (`wh_northstar`, `lh_northstar`, and `PropertyBudget`) unless you also update the SQL that references them. The UUID-shaped markers above are deliberately non-live placeholders, not usable defaults.
+
+Configure the Copy Job's SQL-source connection and destination Lakehouse within the job itself. The placeholder ending in `0007` is the Fabric connection used by `Load Operational Data` to invoke that job, not its SQL-source connection. Creating the job item or uploading a pipeline does not seed the source database or configure those data connections for you.
 
 ## Upload
 
@@ -97,6 +99,8 @@ See the [DataPipeline definition reference](https://learn.microsoft.com/en-us/re
 
 Run `pl_refresh_northstar` for the full workflow. It creates a fresh GUID in `LoadRunID`, writes one `ctl.LoadRun` header, and passes the same ID to both children with `StartLoadRun = false`. The child loaders write their step details through the existing Warehouse procedures. The parent marks the run complete only after the facts finish.
 
+`Load Operational Data` already uses `InvokeCopyJob`; no extra Copy activity is required. The notebook depends on this activity succeeding. During your first runtime test, confirm the Copy Job has completed before the notebook starts, not merely that its run request was accepted. Inspect Copy Job monitoring for per-table copy counts; `ctl.LoadRunDetail` records the Warehouse load steps instead. The [ingestion guide](../guides/copy-job-ingestion.md) explains full-load resets, incremental timestamps, upsert keys, and delete limitations.
+
 For a direct dimension or fact run, supply a fresh GUID as the required `LoadRunID` parameter and leave the Boolean `StartLoadRun` parameter at its default `true`. These child pipelines do not complete or fail the header themselves. The caller must invoke `ctl.usp_complete_load_run` or `ctl.usp_fail_load_run` for that same ID afterward; otherwise the header remains `Running`. Set `StartLoadRun = false` only when the caller has already created that header.
 
 On the full refresh failure path, a failed or skipped `Complete Load Run` triggers `Fail Load Run`, followed by an explicit `Fail Refresh` activity. The final failure is still raised if failure logging itself fails. If initialization or Warehouse access fails before a header can be written, use Fabric activity run history; there may be no matching `ctl.LoadRun` record.
@@ -111,6 +115,28 @@ Avoid concurrent refreshes or reuse of a LoadRunID. Inspect both `ctl.LoadRun` a
 - Replaced the original failure logger's multiple `Failed` dependencies with the failed-or-skipped completion route, and added the explicit final failure activity.
 
 Existing loader procedures, SQL parameters, activity policies, and load dependencies are otherwise retained. The original `Load FactGustSatisfaction` activity-name typo is retained; its stored-procedure reference is unchanged.
+
+## Reference Screenshots
+
+These cropped screenshots show the live reference pipelines, not exact renderings of the sanitized JSON definitions. Browser URLs and account controls have been removed. The images illustrate orchestration layouts; they are not evidence of successful pipeline execution. See [Changes From The Source](#changes-from-the-source) for the differences implemented in this repository.
+
+### Dimension Loading
+
+![Live dimension-load pipeline showing load-run initialization and five dimension loaders](screenshots/pl_load_northstar_dimension-overview.png)
+
+The reference pipeline starts the load run and fans out to the five dimension loaders. The repository template makes this initialization conditional through `StartLoadRun` so a parent can reuse its existing load-run header.
+
+### Fact Loading
+
+![Live fact-load pipeline showing FactBooking before FactStayNight and the other fact loaders in parallel](screenshots/pl_load_northstar_fact-overview.png)
+
+`FactBooking` loads before `FactStayNight`; the other fact loaders run in parallel after load-run initialization. As with the dimension template, the repository's fact template adds conditional initialization.
+
+### Refresh Orchestration
+
+![Live refresh pipeline showing operational ingestion, property-event processing, dimension and fact loading, and load-run logging](screenshots/pl_refresh_northstar-overview.png)
+
+The reference refresh coordinates operational ingestion, property-event processing, dimension loading, fact loading, and load-run logging. This image includes the original external ADF invocation and failure-logging connections. The repository template removes that invocation, revises the failure route, and adds the explicit `Fail Refresh` activity.
 
 ## Validation
 
