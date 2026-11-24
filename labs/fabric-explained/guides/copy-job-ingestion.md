@@ -13,6 +13,8 @@ The reference Copy Job reads Azure SQL tables. It does not read the release ZIP 
 
 ## Prepare the Source and Lakehouse
 
+**Before bringing any data into the Lakehouse, create the `landing`, `processed`, and `quarantine` schemas.** Use a schema-enabled `lh_northstar` Lakehouse.
+
 1. Download the operational CSV release specified by your course from the [repository download guide](../../../README.md). Extract the eight CSVs; the ZIP itself is not a data source.
 2. In a new operational Azure SQL database, run [create-ops-tables.sql](../../../schema/create-ops-tables.sql) to create the eight empty `ops` tables. This is the operational source schema, not the Warehouse schema. The script does not import CSV data and stops if the target tables already exist.
 3. Import each CSV into its same-named `ops` table using a SQL loading tool appropriate to your environment. Follow the download guide's UTF-8, headers, quoting, NULL, date, timestamp, decimal, and Boolean conventions. Preserve exported identity values and supplied audit timestamps; do not regenerate IDs or replace `updated_at_utc` with the import time. Confirm all eight source tables are populated before configuring the Copy Job. No CSV-to-SQL importer is supplied here.
