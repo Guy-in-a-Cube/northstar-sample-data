@@ -2,6 +2,8 @@
 
 Demonstrate a controlled append, an explicit frame refresh, and column residency before the first post-refresh business query. This is Direct Lake on OneLake: the model reads the isolated Lakehouse directly, not its SQL analytics endpoint, and has no SQL DirectQuery fallback.
 
+This is the presenter-only experiment. Students should use the [owned-Warehouse Direct Lake workflow](../direct-lake/README.md), not deploy or run these recording assets as preparation.
+
 ## Recording Environment
 
 Three separate items exist in the `northstar-sample-data` workspace:
@@ -14,7 +16,7 @@ Three separate items exist in the `northstar-sample-data` workspace:
 
 The shared Northstar Warehouse and semantic model were not changed. No synthetic data, new business values, schedule, or report modernization is involved. No learner PowerShell is required.
 
-**Current state:** preparation and initial model refresh succeeded. The deployed notebook is attached to the isolated Lakehouse, has the verified source/target parameters, and defaults to `append`. It has not been run in that stage. Before running it, open the settings for **sm_northstar_framing_demo**, disable **Keep your Direct Lake data up to date**, and apply the change. Change this setting on the new model only. The automated browser reached a sign-in screen, so this setting has not been changed or verified.
+**Status updated 2026-11-27:** the instructor confirmed completion of the append, reset, and final manual model-refresh verification. See the [retained capture](capture-2026-11-25.md) for observations and limits. Before another recording, confirm the isolated model's baseline and that **Keep your Direct Lake data up to date** is off on **sm_northstar_framing_demo** only. Do not change the shared model or run an append as student preparation. This status is instructor-reported, not a fresh automated inspection of the deployed items.
 
 ## Artifacts and Setup
 

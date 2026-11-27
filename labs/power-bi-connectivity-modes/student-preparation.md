@@ -1,6 +1,6 @@
 # Student Preparation and Follow-Along
 
-Complete this preparation before the course. The first five modules use prepared Power BI projects and the existing Northstar data; no PowerShell, data generators, or new Warehouse tables are required. Direct Lake framing preparation will be provided separately. Do not run the framing notebook as part of these steps.
+Complete this preparation before the course. The first five modules use prepared Power BI projects and the existing Northstar data; no PowerShell, data generators, or new Warehouse tables are required. Module 6 uses the [student Direct Lake workflow](direct-lake/README.md): your own Warehouse, one five-row restore checkpoint, and a self-contained setup notebook. Do not run the separate presenter framing notebook as student preparation.
 
 ## Before You Start
 
@@ -29,6 +29,7 @@ Make working copies of the complete project folders in a separate folder outside
 | Compression comparison | [Import without StayNightID](import/without-staynightid/Northstar%20Connectivity%20Import.pbip) |
 | DirectQuery | [Northstar Connectivity DirectQuery.pbip](directquery/Northstar%20Connectivity%20DirectQuery.pbip) |
 | Aggregations and Dual | [Northstar Connectivity Aggregations.pbip](aggregations/Northstar%20Connectivity%20Aggregations.pbip) |
+| Direct Lake update/framing | [Student Direct Lake setup and follow-along](direct-lake/README.md), using your own already-loaded Warehouse |
 
 ## Connect the Warehouse Projects
 
@@ -98,6 +99,12 @@ Open the connected, refreshed Aggregations project. Follow the [Aggregations and
 
 The original measures still reference the detail fact; the engine chooses the summary when it covers the question. Dual dimensions can participate in either path. An uncovered user-defined aggregation is not Direct Lake fallback.
 
+### 6. Direct Lake
+
+Before class, complete the [student Direct Lake preparation](direct-lake/README.md) in a Warehouse you own. This module requires permission to create its five-row restore checkpoint and update RoomRevenue; shared read-only Warehouse access used in earlier modules is not sufficient. Run the setup notebook to create a new comparison model, disable automatic updates on that new model only, and record your baseline.
+
+During the lesson, use the guarded update script, rerun notebook Cell 8 before and after a completed manual model refresh, then use the exact-value reset script and refresh again. Expect only March and whole-model Room Revenue to increase by 50.00, then return to your own baseline. Do not rerun setup, overwrite the checkpoint, change the shared model, or run the presenter's append notebook. Warehouse updates can invalidate segments; this student exercise does not prove append-style residency reuse.
+
 ## Ready-for-Class Checklist
 
 - The full-model thin report opens, filters work, both bookmarks work, and its saved connection survives reopening.
@@ -105,6 +112,7 @@ The original measures still reference the detail fact; the engine chooses the su
 - DirectQuery connects and returns the comparison results with the expected three DirectQuery table modes.
 - Aggregations has refreshed caches and the expected DirectQuery/Dual/Dual/Import modes; both supplied queries execute.
 - All connected files and metric exports are in your own working folder, not replacing the portable templates.
+- For Module 6, your own Warehouse checkpoint and new Direct Lake model are prepared, automatic updates are off on that model, and baseline results are recorded outside the notebook session.
 - You have not run the framing notebook or changed the shared source/model to manufacture a demo result.
 
 ## If Something Does Not Work
@@ -119,4 +127,4 @@ The original measures still reference the detail fact; the engine chooses the su
 | Thin report has missing fields | Reconnect to the full sm_northstar, not the reduced comparison/framing model. Do not convert the report to composite as a workaround. |
 | No fresh source-query event | Confirm DirectQuery mode and the correct connection, enable Server Timings, and consider local query caching. Use the provided captures for reference, not as evidence of your own execution. |
 
-See the [query capture notes](queries/README.md) for examples and their interpretation limits. Direct Lake student preparation is deferred to a separate guide; no additional student deployment is required by this document.
+See the [query capture notes](queries/README.md) for examples and their interpretation limits, and the [Direct Lake guide](direct-lake/README.md) for its additional permissions, setup, recovery and verification limits. The new student Direct Lake workflow has offline validation; a fresh student-environment pilot is still pending.

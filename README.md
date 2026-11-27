@@ -23,7 +23,7 @@ Individual CSVs and event files are available on their [operational](https://git
 ## Labs
 
 - [Fabric Explained](labs/fabric-explained/README.md): Northstar ingestion, transformation, orchestration, and analytics materials.
-- [Power BI Connectivity Modes](labs/power-bi-connectivity-modes/README.md): prepared Power BI projects, [student preparation and follow-along](labs/power-bi-connectivity-modes/student-preparation.md), and verified connectivity/query-path demonstrations. Direct Lake student setup is deferred.
+- [Power BI Connectivity Modes](labs/power-bi-connectivity-modes/README.md): prepared Power BI projects, [student preparation and follow-along](labs/power-bi-connectivity-modes/student-preparation.md), and verified connectivity/query-path demonstrations. The [student Direct Lake workflow](labs/power-bi-connectivity-modes/direct-lake/README.md) adds a setup notebook and guarded update/reset on your own Warehouse; live student validation is pending.
 
 ## License
 

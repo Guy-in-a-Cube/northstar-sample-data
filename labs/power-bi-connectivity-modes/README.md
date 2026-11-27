@@ -2,7 +2,7 @@
 
 ## Students Start Here
 
-Use the [student preparation and follow-along guide](student-preparation.md) for prerequisites, working copies, connection steps, result checks, and the first five course modules. Complete setup before the lessons. Direct Lake student preparation is deferred to a separate workflow; do not run the framing notebook as part of this preparation.
+Use the [student preparation and follow-along guide](student-preparation.md) for prerequisites, working copies, connection steps, result checks, and all six course modules. Complete setup before the lessons. Module 6 has a [student Direct Lake workflow](direct-lake/README.md) against your own loaded Warehouse; do not run the separate presenter framing notebook as student preparation.
 
 ## Purpose and Status
 
@@ -12,7 +12,7 @@ Build one reusable Northstar demo kit for three formats:
 - Sixty-minute session: 50 minutes of content plus 10 minutes of Q&A, emphasizing compression, Import/DirectQuery, and Direct Lake incremental framing.
 - Ten-minute Guy in a Cube video: selected comparisons and tradeoffs, not three setup tutorials or another dedicated Direct Lake walkthrough.
 
-Status updated 2026-11-27: the instructor confirmed completion of the framing reset/manual-refresh verification, the demo rehearsals, the Import compression checks, and the thin-report reconnection checks. The prepared projects and query captures support guided follow-along with prerequisites. The student guide covers the first five modules; Direct Lake student preparation is intentionally deferred. This is instructor-reported completion, not an independent fresh-student setup study or a controlled timing benchmark. No numerical compression results are published without a retained metric capture.
+Status updated 2026-11-27: the instructor confirmed completion of the presenter framing reset/manual-refresh verification, the demo rehearsals, the Import compression checks, and the thin-report reconnection checks. The prepared projects and query captures support guided follow-along with prerequisites. The student guide now includes a separate Direct Lake setup notebook and guarded Warehouse update/reset exercise. The new student workflow has offline validation only; a fresh student-environment pilot is pending. Instructor-reported completion is not an independent setup study or a controlled timing benchmark. No numerical compression results are published without a retained metric capture.
 
 The source research and pilot observations below are dated evidence, not a new list of student readiness blockers. Portable Git versions use placeholder bindings; keep your configured Desktop copies and caches local. Earlier generators and supplemental compression samples were retired. Report modernization remains deferred.
 
@@ -21,6 +21,8 @@ The source research and pilot observations below are dated evidence, not a new l
 **Warehouse first; supplemental data only for a demonstrated gap.** Research the existing tables and model before deciding which artifacts to build. Do not assume compression needs a separate model or dataset.
 
 The learner experience is: open a prepared report/model, connect or reconnect through the supported Power BI interface, authenticate, verify a familiar result, and inspect the behavior. Learners do not run PowerShell scripts, generate sample files, or deploy an additional business schema.
+
+For controlled student Direct Lake framing, the self-contained notebook creates a new three-table model against the student's own Warehouse. One five-row control checkpoint supports a reversible update; it is not a new business schema. Keep shared data/models and the presenter append experiment separate.
 
 Reuse the loaded `wh_northstar` and the existing Direct Lake `sm_northstar`. The Import comparison model should also support compression inspection if its real columns meet the teaching objectives. Add a separate asset only when research and measurements show why it is necessary.
 
@@ -69,7 +71,7 @@ The additional SELECT and model-metadata checks used existing sources only. No s
 | Import / DirectQuery | FactStayNight with DimDate and DimProperty answers the same checked revenue question | Prepare matching full-detail projections, measures, filters, and layouts. Observe actual query paths; timings alone are insufficient. |
 | Aggregations / Dual | Initial stay-date/property grouping reduced 1,047,284 detail rows to 22,702 groups | Separate model verified in Desktop: named Import summary scan for the covered query and source SQL for uncovered NightNumber detail; current totals recorded in its walkthrough. |
 | Direct Lake reuse | Existing sm_northstar uses Direct Lake on OneLake; the supplied thin report already references it | Reuse without rebinding the model's source. A report connection change is not a storage-mode change or SQL fallback demonstration. |
-| Incremental framing | The isolated append preserved the original file; pre-business-query residency and changed totals were observed | The presenter experiment and reset verification are complete. Student preparation remains a separate deferred workflow; do not alter shared data. |
+| Incremental framing | The isolated append preserved the original file; pre-business-query residency and changed totals were observed | Presenter experiment/reset verification complete. The separate student Warehouse update/framing workflow is packaged with offline checks; it makes no append-residency claim and never targets shared data. |
 
 All thirteen declared FactStayNight columns reported encoding code 1 in the current Direct Lake storage metadata. RoomsOccupied and RoomRevenue had resident segments; StayNightID and NightNumber did not. The latter's small reported bytes are not evidence of excellent compression. Segment metadata represented 1,048,221 rows, while SQL and DAX both still returned 1,047,284 logical rows and 271,545,702.00 room revenue. Do not substitute physical segment counts for logical business counts or treat current residency as a complete Import storage measurement. These reads can warm caches and are not a pre-query framing baseline.
 
@@ -146,7 +148,9 @@ The unchanged monthly query returned the expected values and positively scanned 
 
 The [isolated framing demo](framing/README.md) now has its own Lakehouse, configured notebook, and Direct Lake on OneLake semantic model in the separately approved `northstar-sample-data` workspace. It uses frozen real Northstar rows with a 25-row latest-date holdout, leaving the shared Warehouse and model unchanged. A portable model template, notebook source, totals query, and residency query are included.
 
-The presenter capture added one file and removed none, preserved the original file, observed the original summed-column segments resident immediately after framing and before business queries, and confirmed the 25-row increase. Reset restored the Lakehouse baseline. The automated final XMLA refresh stalled; the instructor completed a manual UI refresh on 2026-11-27 and verified 1,047,495 stay nights, 1,317,796 occupied rooms, and 271,602,367.00 room revenue. Automatic updates remain off for controlled captures. This closes the presenter reset; it does not establish an easy independent student deployment. Student Direct Lake preparation will be addressed separately.
+The presenter capture added one file and removed none, preserved the original file, observed the original summed-column segments resident immediately after framing and before business queries, and confirmed the 25-row increase. Reset restored the Lakehouse baseline. The automated final XMLA refresh stalled; the instructor completed a manual UI refresh on 2026-11-27 and verified 1,047,495 stay nights, 1,317,796 occupied rooms, and 271,602,367.00 room revenue. Automatic updates remain off for controlled captures. This closes the presenter reset; it does not establish an easy independent student deployment.
+
+The [student Direct Lake guide](direct-lake/README.md) instead creates a new small model directly against each student's own Warehouse, captures five original revenues, applies a guarded total increase of 50.00, and restores exact originals. Students observe results around manual UI refreshes. An UPDATE may replace files/invalidate resident segments; this is data visibility/framing, not append-style file preservation. New student assets have offline validation only and leave live shared/presenter assets untouched.
 
 ## Build Sequence
 
@@ -205,6 +209,6 @@ Preserve `wh_northstar`, `sm_northstar`, Fabric Explained assets, unrelated user
 
 The existing OneLake model has no SQL DirectQuery fallback. Any demonstrated SQL-based Direct Lake fallback needs separate verified architecture-specific evidence; otherwise explain the distinction without claiming an observed fallback.
 
-Confirm exact targets and operations before execution. Keep private IDs and raw captures outside learner artifacts, never store credentials, and add files only when an agreed demo needs them. Import incremental refresh and hybrid tables remain outside scope. The current authorization is student documentation and a local commit, not a push or new live operations.
+Confirm exact targets and operations before execution. Keep private IDs and raw captures outside learner artifacts, never store credentials, and add files only when an agreed demo needs them. Import incremental refresh and hybrid tables remain outside scope. Committing, pushing and opening a PR for student assets does not authorize executing their live Warehouse/model operations.
 
-**Next action:** distribute the [student preparation guide](student-preparation.md) and prepared projects for the first five modules. The instructor confirmed the remaining preparation checks and rehearsals are complete. Work through the proposed Direct Lake student-preparation approach separately before extending that guide. Exact visual-generated query capture, an independent student setup test, and controlled timing benchmarks are separate evidence tasks, not prerequisites for the already rehearsed demos. Report modernization remains deferred. No supplemental dataset is proposed.
+**Next action:** distribute the [student preparation guide](student-preparation.md) and prepared projects, and pilot the new [student Direct Lake workflow](direct-lake/README.md) in an owned student environment. The instructor confirmed the prior preparation checks and rehearsals are complete; that does not validate the new Warehouse update/reset path. Exact visual-generated query capture and controlled timing benchmarks remain separate evidence tasks. Report modernization remains deferred. No supplemental dataset is proposed.
