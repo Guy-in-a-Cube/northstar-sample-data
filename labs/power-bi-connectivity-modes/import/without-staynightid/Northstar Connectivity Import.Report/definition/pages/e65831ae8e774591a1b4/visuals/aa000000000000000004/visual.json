@@ -1,0 +1,32 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "aa000000000000000004",
+  "position": { "x": 24, "y": 128, "z": 4000, "height": 320, "width": 1232, "tabOrder": 3000 },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": { "projections": [{
+          "field": { "Column": { "Expression": { "SourceRef": { "Entity": "DimDate" } }, "Property": "YearMonth" } },
+          "queryRef": "DimDate.YearMonth", "nativeQueryRef": "YearMonth", "active": true
+        }] },
+        "Y": { "projections": [{
+          "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "FactStayNight" } }, "Property": "Room Revenue" } },
+          "queryRef": "FactStayNight.Room Revenue", "nativeQueryRef": "Room Revenue"
+        }] }
+      },
+      "sortDefinition": { "sort": [{
+        "field": { "Column": { "Expression": { "SourceRef": { "Entity": "DimDate" } }, "Property": "YearMonth" } },
+        "direction": "Ascending"
+      }], "isDefaultSort": true }
+    },
+    "objects": { "dataPoint": [{
+      "properties": { "fill": { "solid": { "color": { "expr": { "Literal": { "Value": "'#147D64'" } } } } } },
+      "selector": { "metadata": "FactStayNight.Room Revenue" }
+    }] },
+    "visualContainerObjects": { "title": [{ "properties": {
+      "show": { "expr": { "Literal": { "Value": "true" } } },
+      "text": { "expr": { "Literal": { "Value": "'Room revenue by month'" } } }
+    } }] }
+  }
+}

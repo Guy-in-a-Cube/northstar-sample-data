@@ -20,6 +20,11 @@ Individual CSVs and event files are available on their [operational](https://git
 - **Excel:** select `PropertyBudgetTable` and follow Microsoft's [Create a list based on a spreadsheet](https://support.microsoft.com/en-us/office/create-a-list-based-on-a-spreadsheet-380cfeb5-6e14-438e-988a-c2b9bea574fa) instructions in your own SharePoint site. Revenue is USD; occupancy is a fraction (`0.2322` means 23.22%). `PropertyCode` matches operational `Property.property_code`, not `property_id`. SharePoint import has not been tested here.
 - **JSON:** parse one JSON object per line, not a single JSON array. Upload the extracted files to your own private Blob container if required by your course. Event-type variations, two timestamps without timezones, and two unmatched property codes (`999`) are preserved; processing rules must handle them explicitly.
 
+## Labs
+
+- [Fabric Explained](labs/fabric-explained/README.md): Northstar ingestion, transformation, orchestration, and analytics materials.
+- [Power BI Connectivity Modes](labs/power-bi-connectivity-modes/README.md): prepared Power BI projects, [student preparation and follow-along](labs/power-bi-connectivity-modes/student-preparation.md), and verified connectivity/query-path demonstrations. The [student Direct Lake workflow](labs/power-bi-connectivity-modes/direct-lake/README.md) adds a setup notebook and guarded update/reset on your own Warehouse; live student validation is pending.
+
 ## License
 
 The released synthetic data and maintainer-owned code/documentation are dedicated under CC0 1.0, with separate owner approvals. See [LICENSE](LICENSE). Third-party rights, trademarks, and patents are not waived.

@@ -1,0 +1,39 @@
+/// Existing Northstar property dimension, one row per property; PropertyCode is the portable business identifier.
+table DimProperty
+	lineageTag: 561c8be5-1ff8-4837-99aa-33ba6c8c1a28
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		isKey
+		sourceProviderType: bigint
+		lineageTag: b7cc3e86-5682-49f3-b622-6d979d546027
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+	/// Portable Northstar business code, not the environment-generated Warehouse key.
+	column PropertyCode
+		dataType: int64
+		sourceProviderType: int
+		lineageTag: 29135f9f-09df-46f6-ab4d-26497f7c275e
+		summarizeBy: none
+		sourceColumn: PropertyCode
+
+	/// Northstar property's display name.
+	column PropertyName
+		dataType: string
+		sourceProviderType: varchar(100)
+		lineageTag: 5f55582b-09f7-49dd-bbe7-a07a94da739f
+		summarizeBy: none
+		sourceColumn: PropertyName
+
+	partition DimProperty = m
+		mode: directQuery
+		source =
+				let
+				    Source = Sql.Database(WarehouseServer, WarehouseDatabase, [CreateNavigationProperties=false]),
+				    Properties = Source{[Schema="dw", Item="DimProperty"]}[Data],
+				    Projection = Table.SelectColumns(Properties, {"PropertyKey", "PropertyCode", "PropertyName"})
+				in
+				    Projection
+

@@ -1,0 +1,32 @@
+/// Copied Northstar property dimension. Use the stable PropertyCode for comparisons.
+table DimProperty
+	lineageTag: 329b13cc-d6b6-42a0-9eff-a65fef7516d7
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		isKey
+		lineageTag: 1f4efaa4-fa1b-4cf8-89f1-496f845c1140
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+	/// Stable business code identifying the property.
+	column PropertyCode
+		dataType: int64
+		lineageTag: 57c913a1-3697-48f5-8737-3f06db9db71c
+		summarizeBy: none
+		sourceColumn: PropertyCode
+
+	/// Display name of the Northstar property.
+	column PropertyName
+		dataType: string
+		lineageTag: 5cd5b6e8-091a-46d2-a5ea-92efaa23ae72
+		sourceColumn: PropertyName
+
+	partition DimProperty = entity
+		mode: directLake
+		source
+			entityName: dimproperty
+			schemaName: dbo
+			expressionSource: 'DirectLake - Northstar Framing'
+

@@ -1,0 +1,22 @@
+/// Local Aggregations and Dual connectivity demo over the existing Northstar Warehouse. DirectQuery detail, Dual dimensions, and an Import date/property summary. No Fabric deployment.
+model 'Northstar Connectivity Aggregations'
+	defaultMode: directQuery
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["FactStayNight","DimDate","DimProperty","AggStayNightDateProperty","WarehouseServer","WarehouseDatabase"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table FactStayNight
+ref table DimDate
+ref table DimProperty
+ref table AggStayNightDateProperty
+

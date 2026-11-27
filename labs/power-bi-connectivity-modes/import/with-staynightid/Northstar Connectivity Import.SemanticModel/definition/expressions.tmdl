@@ -1,0 +1,12 @@
+/// Paste the Warehouse SQL connection string hostname in Power BI's parameter interface; no protocol prefix or credentials.
+expression WarehouseServer = "YOUR_WAREHOUSE_SQL_ENDPOINT" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type text]
+	lineageTag: 6088f40b-3f85-4044-b282-623d2b6ad8e0
+
+	annotation PBI_ResultType = Text
+
+/// The learner's Warehouse database name.
+expression WarehouseDatabase = "wh_northstar" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type text]
+	lineageTag: 9a38701e-31fd-4fc8-a677-2b3f6904724f
+
+	annotation PBI_ResultType = Text
+

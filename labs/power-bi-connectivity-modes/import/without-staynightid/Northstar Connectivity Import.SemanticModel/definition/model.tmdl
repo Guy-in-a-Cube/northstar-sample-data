@@ -1,0 +1,15 @@
+model 'Northstar Connectivity Import'
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+ref table FactStayNight
+ref table DimDate
+ref table DimProperty
+
