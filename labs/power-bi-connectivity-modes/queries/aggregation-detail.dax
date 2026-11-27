@@ -1,0 +1,12 @@
+EVALUATE
+SUMMARIZECOLUMNS (
+    'DimProperty'[PropertyName],
+    'DimDate'[YearMonth],
+    'FactStayNight'[NightNumber],
+    TREATAS ( { 201 }, 'DimProperty'[PropertyCode] ),
+    TREATAS ( { "2026-03", "2026-04" }, 'DimDate'[YearMonth] ),
+    "Stay Nights", [Stay Nights],
+    "Rooms Occupied", [Rooms Occupied],
+    "Room Revenue", [Room Revenue]
+)
+ORDER BY 'DimDate'[YearMonth] ASC, 'FactStayNight'[NightNumber] ASC

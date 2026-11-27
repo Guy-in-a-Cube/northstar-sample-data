@@ -1,0 +1,43 @@
+/// Existing Warehouse calendar, one row per date; YearMonth is the sortable yyyy-MM comparison period.
+table DimDate
+	lineageTag: c208890a-ff2e-4c09-af95-de9514c23528
+
+	column DateKey
+		dataType: int64
+		isHidden
+		isKey
+		sourceProviderType: int
+		lineageTag: 93e614b8-c025-45f2-904b-04eeace45616
+		summarizeBy: none
+		sourceColumn: DateKey
+
+	/// Calendar date mapped from dw.DimDate.FullDate.
+	column Date
+		dataType: dateTime
+		isNullable: false
+		formatString: yyyy-MM-dd
+		sourceProviderType: date
+		lineageTag: a7e33c72-9467-4ba0-b8ba-9cb7b33ccfe7
+		summarizeBy: none
+		sourceColumn: FullDate
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Calendar month in yyyy-MM form, suitable for chronological ascending sort.
+	column YearMonth
+		dataType: string
+		sourceProviderType: char(7)
+		lineageTag: 4663c226-c912-4934-bd58-d5bb333143fc
+		summarizeBy: none
+		sourceColumn: YearMonth
+
+	partition DimDate = m
+		mode: directQuery
+		source =
+				let
+				    Source = Sql.Database(WarehouseServer, WarehouseDatabase, [CreateNavigationProperties=false]),
+				    Dates = Source{[Schema="dw", Item="DimDate"]}[Data],
+				    Projection = Table.SelectColumns(Dates, {"DateKey", "FullDate", "YearMonth"})
+				in
+				    Projection
+

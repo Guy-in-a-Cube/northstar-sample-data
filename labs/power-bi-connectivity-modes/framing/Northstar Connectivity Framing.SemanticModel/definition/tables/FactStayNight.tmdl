@@ -1,0 +1,69 @@
+/// One row per stay night copied into the isolated framing Lakehouse. The latest stay date is initially held out.
+table FactStayNight
+	lineageTag: 12a5f825-0ee2-46c7-a384-e888a9f90d75
+
+	/// Stay-night rows visible at the model's current frame.
+	measure 'Stay Nights' = COUNTROWS('FactStayNight')
+		formatString: #,##0
+		lineageTag: 9ac67c3e-6548-4ab2-8721-1ee9012a2941
+
+	/// Occupied room nights visible at the model's current frame.
+	measure 'Rooms Occupied' = SUM('FactStayNight'[RoomsOccupied])
+		formatString: #,##0
+		lineageTag: 6fef1ecf-2ee1-4c02-ad13-3655ea667d14
+
+	/// Room revenue visible at the model's current frame. Matches the comparison models' numeric type.
+	measure 'Room Revenue' = SUM('FactStayNight'[RoomRevenue])
+		formatString: $#,##0.00
+		lineageTag: d532d736-d48a-4e71-b473-bf0fdb40e4ea
+
+	column StayNightID
+		dataType: int64
+		isHidden
+		lineageTag: 4c949834-d483-4b1e-9d61-2b6fa5b869e5
+		summarizeBy: none
+		sourceColumn: StayNightID
+
+	column StayDateKey
+		dataType: int64
+		isHidden
+		lineageTag: f9e9e699-16f8-49cf-b5d8-663e9b091fbe
+		summarizeBy: none
+		sourceColumn: StayDateKey
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		lineageTag: 20bc8658-85a2-4367-9d47-c9bc72183123
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+	column NightNumber
+		dataType: int64
+		isHidden
+		lineageTag: b2209b01-11a6-4b25-ac13-dbe3bfdb53f1
+		summarizeBy: none
+		sourceColumn: NightNumber
+
+	column RoomsOccupied
+		dataType: int64
+		isHidden
+		lineageTag: 38604ee7-f1e1-4e8f-9390-f4495de8c920
+		summarizeBy: none
+		sourceColumn: RoomsOccupied
+
+	column RoomRevenue
+		dataType: double
+		isHidden
+		formatString: $#,##0.00
+		lineageTag: 8eb20054-8adc-4bfa-aa59-45d251d30470
+		summarizeBy: none
+		sourceColumn: RoomRevenue
+
+	partition FactStayNight = entity
+		mode: directLake
+		source
+			entityName: factstaynight
+			schemaName: dbo
+			expressionSource: 'DirectLake - Northstar Framing'
+

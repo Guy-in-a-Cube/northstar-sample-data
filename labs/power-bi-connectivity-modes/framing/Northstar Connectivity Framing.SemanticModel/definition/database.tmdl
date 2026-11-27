@@ -1,0 +1,4 @@
+/// Isolated Direct Lake on OneLake framing demonstration over copied Northstar rows; no SQL fallback.
+database sm_northstar_framing_demo
+	compatibilityLevel: 1702
+

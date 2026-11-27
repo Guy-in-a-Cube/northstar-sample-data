@@ -1,0 +1,15 @@
+EVALUATE
+SELECTCOLUMNS (
+    FILTER (
+        INFO.STORAGETABLECOLUMNSEGMENTS (),
+        [DIMENSION_NAME] = "FactStayNight"
+            && NOT CONTAINSSTRING ( [COLUMN_ID], "RowNumber" )
+    ),
+    "Column", [COLUMN_ID],
+    "Segment", [SEGMENT_NUMBER],
+    "Rows", [RECORDS_COUNT],
+    "Resident", [ISRESIDENT],
+    "Used Bytes", [USED_SIZE],
+    "Last Accessed", [LAST_ACCESSED]
+)
+ORDER BY [Column], [Segment]

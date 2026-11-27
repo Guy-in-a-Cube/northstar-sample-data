@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Northstar Connectivity Aggregations"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f8703db8-bc66-4a2d-bd1f-5eae78d90e18"
+  }
+}

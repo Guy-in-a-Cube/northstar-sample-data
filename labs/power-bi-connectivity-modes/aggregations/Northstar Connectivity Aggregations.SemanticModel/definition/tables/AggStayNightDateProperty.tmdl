@@ -1,0 +1,75 @@
+/// Imported stay-date/property summary. Measures remain on the DirectQuery fact; aggregation mappings enable eligible query rewrites.
+table AggStayNightDateProperty
+	isHidden
+	lineageTag: 3076e7b0-98bd-4709-888f-8ea3d2737dc8
+
+	column StayDateKey
+		dataType: int64
+		isHidden
+		sourceProviderType: int
+		lineageTag: 27df6a69-9571-44f0-a7de-dc67852fc298
+		summarizeBy: none
+		sourceColumn: StayDateKey
+
+		alternateOf
+			baseColumn: FactStayNight.StayDateKey
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		sourceProviderType: bigint
+		lineageTag: 2b9b922b-7658-4b21-8c3f-4fcfdcf8bf9f
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+		alternateOf
+			baseColumn: FactStayNight.PropertyKey
+
+	column StayNights
+		dataType: int64
+		isHidden
+		formatString: #,##0
+		sourceProviderType: bigint
+		lineageTag: 2def9d23-4036-4a62-a915-f9985b7f3a85
+		summarizeBy: none
+		sourceColumn: StayNights
+
+		alternateOf
+			summarization: count
+			baseTable: FactStayNight
+
+	column RoomsOccupied
+		dataType: int64
+		isHidden
+		formatString: #,##0
+		sourceProviderType: bigint
+		lineageTag: 070bd1aa-80df-4195-ae10-6efb97dda300
+		summarizeBy: none
+		sourceColumn: RoomsOccupied
+
+		alternateOf
+			summarization: sum
+			baseColumn: FactStayNight.RoomsOccupied
+
+	column RoomRevenue
+		dataType: double
+		isHidden
+		formatString: #,##0.00
+		sourceProviderType: float
+		lineageTag: 2a99f9ff-c490-4a04-bf44-f788a564caba
+		summarizeBy: none
+		sourceColumn: RoomRevenue
+
+		alternateOf
+			summarization: sum
+			baseColumn: FactStayNight.RoomRevenue
+
+	partition AggStayNightDateProperty = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(WarehouseServer, WarehouseDatabase, [CreateNavigationProperties=false]),
+				    Aggregation = Value.NativeQuery(Source, "SELECT StayDateKey, PropertyKey, COUNT_BIG(*) AS StayNights, SUM(CAST(RoomsOccupied AS bigint)) AS RoomsOccupied, CAST(SUM(RoomRevenue) AS float) AS RoomRevenue FROM dw.FactStayNight GROUP BY StayDateKey, PropertyKey", null, [EnableFolding=true])
+				in
+				    Aggregation
+

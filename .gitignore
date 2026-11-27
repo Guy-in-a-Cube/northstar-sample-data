@@ -17,3 +17,15 @@ Thumbs.db
 /labs/fabric-explained/power-bi/**/*.pbix
 !/labs/fabric-explained/power-bi/Northstar Property Health.pbix
 /labs/fabric-explained/power-bi/**/*.abf
+/labs/power-bi-connectivity-modes/import/**/.pbi/
+/labs/power-bi-connectivity-modes/import/**/*.abf
+/labs/power-bi-connectivity-modes/import/**/*.pbix
+/labs/power-bi-connectivity-modes/directquery/**/.pbi/
+/labs/power-bi-connectivity-modes/directquery/**/*.abf
+/labs/power-bi-connectivity-modes/directquery/**/*.pbix
+/labs/power-bi-connectivity-modes/aggregations/**/.pbi/
+/labs/power-bi-connectivity-modes/aggregations/**/*.abf
+/labs/power-bi-connectivity-modes/aggregations/**/*.pbix
+/labs/power-bi-connectivity-modes/thin-report/**/.pbi/
+/labs/power-bi-connectivity-modes/thin-report/**/*.abf
+/labs/power-bi-connectivity-modes/thin-report/**/*.pbix

@@ -1,0 +1,73 @@
+/// One row per occupied stay night; full Warehouse detail retained for the connectivity and compression comparison.
+table FactStayNight
+	lineageTag: 20d02157-b1ec-454e-b172-32965d7bc7f8
+
+	/// Number of fact rows in the current stay-date and property context; not a booking count.
+	measure 'Stay Nights' = COUNTROWS('FactStayNight')
+		formatString: #,##0
+		lineageTag: 8b5a8977-204b-4da9-8ab9-b8c190e9314d
+
+	/// Occupied room-nights summed across stay-night detail in the current context.
+	measure 'Rooms Occupied' = SUM('FactStayNight'[RoomsOccupied])
+		formatString: #,##0
+		lineageTag: 70b2043a-ad1c-4ada-be3f-4b1b4631fea4
+
+	/// Room revenue only, excluding experience and other revenue and discounts; aligned with the existing Northstar measure.
+	measure 'Room Revenue' = SUM('FactStayNight'[RoomRevenue])
+		formatString: $#,##0.00
+		lineageTag: 3916944a-223f-491b-84b3-3b294ead469d
+
+	column StayNightID
+		dataType: int64
+		isHidden
+		lineageTag: dfd7a6be-68ea-41de-8d1d-53578bd73a6d
+		summarizeBy: none
+		sourceColumn: StayNightID
+
+	column StayDateKey
+		dataType: int64
+		isHidden
+		lineageTag: a5260baa-019f-4979-9a9c-a5653682700b
+		summarizeBy: none
+		sourceColumn: StayDateKey
+
+	column PropertyKey
+		dataType: int64
+		isHidden
+		lineageTag: 4c156c2c-3af6-4740-97d7-b78ced41c5c4
+		summarizeBy: none
+		sourceColumn: PropertyKey
+
+	column NightNumber
+		dataType: int64
+		isHidden
+		lineageTag: 1c1ae79e-9a01-40c3-be70-af51c30000e2
+		summarizeBy: none
+		sourceColumn: NightNumber
+
+	column RoomsOccupied
+		dataType: int64
+		isHidden
+		lineageTag: 308816ec-35d1-418c-b200-81bb9aba3774
+		summarizeBy: none
+		sourceColumn: RoomsOccupied
+
+	column RoomRevenue
+		dataType: double
+		isHidden
+		formatString: #,##0.00
+		lineageTag: b3793da0-19ad-4123-b139-258f31160131
+		summarizeBy: none
+		sourceColumn: RoomRevenue
+
+	partition FactStayNight = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(WarehouseServer, WarehouseDatabase, [CreateNavigationProperties=false]),
+				    StayNights = Source{[Schema="dw", Item="FactStayNight"]}[Data],
+				    Projection = Table.SelectColumns(StayNights, {"StayNightID", "StayDateKey", "PropertyKey", "NightNumber", "RoomsOccupied", "RoomRevenue"}),
+				    Typed = Table.TransformColumnTypes(Projection, {{"StayNightID", Int64.Type}, {"StayDateKey", Int64.Type}, {"PropertyKey", Int64.Type}, {"NightNumber", Int64.Type}, {"RoomsOccupied", Int64.Type}, {"RoomRevenue", type number}})
+				in
+				    Typed
+

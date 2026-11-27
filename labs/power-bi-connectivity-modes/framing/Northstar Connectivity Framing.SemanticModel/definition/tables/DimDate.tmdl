@@ -1,0 +1,32 @@
+/// Copied date dimension for the same Northstar snapshot; Date maps to the source FullDate column.
+table DimDate
+	lineageTag: 11a11eb3-6e41-433f-a1c8-383fea50a6a9
+
+	column DateKey
+		dataType: int64
+		isHidden
+		isKey
+		lineageTag: fbfd8cd2-7dee-4ab8-bad4-010fc6d7c306
+		summarizeBy: none
+		sourceColumn: DateKey
+
+	/// Calendar date associated with the stay night.
+	column Date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		lineageTag: 603dfa73-324b-4a9c-af9e-f9bea7970103
+		sourceColumn: FullDate
+
+	/// Calendar month in YYYY-MM format.
+	column YearMonth
+		dataType: string
+		lineageTag: cfe5648b-feaf-439b-b1c2-98764b232fdb
+		sourceColumn: YearMonth
+
+	partition DimDate = entity
+		mode: directLake
+		source
+			entityName: dimdate
+			schemaName: dbo
+			expressionSource: 'DirectLake - Northstar Framing'
+

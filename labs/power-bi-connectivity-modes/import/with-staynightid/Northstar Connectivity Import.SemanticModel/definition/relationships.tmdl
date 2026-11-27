@@ -1,0 +1,8 @@
+relationship 'StayNight Date'
+	fromColumn: FactStayNight.StayDateKey
+	toColumn: DimDate.DateKey
+
+relationship 'StayNight Property'
+	fromColumn: FactStayNight.PropertyKey
+	toColumn: DimProperty.PropertyKey
+

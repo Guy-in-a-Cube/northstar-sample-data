@@ -1,0 +1,12 @@
+/// Direct OneLake connection to the isolated demo Lakehouse; does not use a SQL analytics endpoint.
+expression 'DirectLake - Northstar Framing' =
+		let
+		    Source = AzureStorage.DataLake(OneLakeSourceUrl, [HierarchicalNavigation=true])
+		in
+		    Source
+	lineageTag: 685ce5d4-ac8a-4eb5-8b43-e752a76c4554
+
+/// OneLake root URL of your isolated framing Lakehouse; never point this demo at the shared Warehouse.
+expression OneLakeSourceUrl = "https://onelake.dfs.fabric.microsoft.com/YOUR_WORKSPACE_ID/YOUR_LAKEHOUSE_ID" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 12f8e42e-937b-4d26-906e-7e89306de979
+

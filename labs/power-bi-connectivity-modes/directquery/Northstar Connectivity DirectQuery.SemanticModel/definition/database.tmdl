@@ -1,0 +1,4 @@
+/// Local Import connectivity pilot over the existing Northstar Warehouse. No Fabric deployment.
+database
+	compatibilityLevel: 1702
+

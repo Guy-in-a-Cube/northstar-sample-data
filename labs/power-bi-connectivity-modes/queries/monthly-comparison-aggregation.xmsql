@@ -1,0 +1,10 @@
+SET DC_KIND="AUTO";
+SELECT
+[DimDate (13)].[YearMonth (36)] AS [DimDate (13)$YearMonth (36)], [DimProperty (16)].[PropertyName (39)] AS [DimProperty (16)$PropertyName (39)],
+SUM([AggStayNightDateProperty (19)].[RoomRevenue (44)]) AS [$Measure0], SUM([AggStayNightDateProperty (19)].[StayNights (42)]) AS [$Measure1], SUM([AggStayNightDateProperty (19)].[RoomsOccupied (43)]) AS [$Measure2]
+FROM [AggStayNightDateProperty (19)]
+	LEFT OUTER JOIN [DimDate (13)] ON [AggStayNightDateProperty (19)].[StayDateKey (40)]=[DimDate (13)].[DateKey (34)]
+	LEFT OUTER JOIN [DimProperty (16)] ON [AggStayNightDateProperty (19)].[PropertyKey (41)]=[DimProperty (16)].[PropertyKey (37)]
+WHERE
+	[DimDate (13)].[YearMonth (36)] IN ('2026-03', '2026-04') VAND
+	[DimProperty (16)].[PropertyCode (38)] = 201;
